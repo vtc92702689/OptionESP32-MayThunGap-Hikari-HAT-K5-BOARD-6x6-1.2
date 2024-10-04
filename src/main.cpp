@@ -7,126 +7,129 @@
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
 
-const char* jsonString = "{\
-  \"main\": {\
-    \"main1\": {\
-      \"text\": \"Cài Đặt\",\
-      \"key\": \"CD\",\
-      \"children\": {\
-        \"CD1\": {\
-          \"text\": \"Text1\",\
-          \"value\": \"GT1\",\
-          \"function\": \"CN1\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD2\": {\
-          \"text\": \"Text2\",\
-          \"value\": \"GT2\",\
-          \"function\": \"CN2\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD3\": {\
-          \"text\": \"Text3\",\
-          \"value\": \"GT3\",\
-          \"function\": \"CN3\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD4\": {\
-          \"text\": \"Text4\",\
-          \"value\": \"GT4\",\
-          \"function\": \"CN4\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD5\": {\
-          \"text\": \"Text5\",\
-          \"value\": \"GT5\",\
-          \"function\": \"CN5\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD6\": {\
-          \"text\": \"Text6\",\
-          \"value\": \"GT6\",\
-          \"function\": \"CN6\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD7\": {\
-          \"text\": \"Text7\",\
-          \"value\": \"GT7\",\
-          \"function\": \"CN7\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD8\": {\
-          \"text\": \"Text8\",\
-          \"value\": \"GT8\",\
-          \"function\": \"CN8\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD9\": {\
-          \"text\": \"Text9\",\
-          \"value\": \"GT9\",\
-          \"function\": \"CN9\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        },\
-        \"CD10\": {\
-          \"text\": \"Text10\",\
-          \"value\": \"GT10\",\
-          \"function\": \"CN10\",\
-          \"belonging\": \"\",\
-          \"minValue\": 1,\
-          \"maxValue\": 1000,\
-          \"accessAllowed\": true,\
-          \"editAllowed\": true\
-        }\
-      }\
-    },\
-    \"main2\": {\
-      \"text\": \"Kiểm Tra\",\
-      \"key\": \"KT\",\
-      \"children\": {}\
-    },\
-    \"main3\": {\
-      \"text\": \"Giới Thiệu\",\
-      \"key\": \"GT\",\
-      \"children\": {}\
-    }\
-  }\
-}";
+
+StaticJsonDocument<200> jsonDoc;
+
+const char* jsonString = R"({
+  "main": {
+    "main1": {
+      "text": "Cài Đặt",
+      "key": "CD",
+      "children": {
+        "CD1": {
+          "text": "Text1",
+          "value": "GT1",
+          "function": "CN1",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD2": {
+          "text": "Text2",
+          "value": "GT2",
+          "function": "CN2",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD3": {
+          "text": "Text3",
+          "value": "GT3",
+          "function": "CN3",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD4": {
+          "text": "Text4",
+          "value": "GT4",
+          "function": "CN4",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD5": {
+          "text": "Text5",
+          "value": "GT5",
+          "function": "CN5",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD6": {
+          "text": "Text6",
+          "value": "GT6",
+          "function": "CN6",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD7": {
+          "text": "Text7",
+          "value": "GT7",
+          "function": "CN7",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD8": {
+          "text": "Text8",
+          "value": "GT8",
+          "function": "CN8",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD9": {
+          "text": "Text9",
+          "value": "GT9",
+          "function": "CN9",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "CD10": {
+          "text": "Text10",
+          "value": "GT10",
+          "function": "CN10",
+          "belonging": "",
+          "minValue": 1,
+          "maxValue": 1000,
+          "accessAllowed": true,
+          "editAllowed": true
+        }
+      }
+    },
+    "main2": {
+      "text": "Kiểm Tra",
+      "key": "KT",
+      "children": {}
+    },
+    "main3": {
+      "text": "Giới Thiệu",
+      "key": "GT",
+      "children": {}
+    }
+  }
+})";
 
 
 // Khai báo các nút
@@ -135,10 +138,10 @@ const int btnSet = 33;
 const int btnUp = 34;
 const int btnDown = 35;*/
 
-OneButton btnMenu(32, false);
-OneButton btnSet(33, false);
-OneButton btnUp(34, false);
-OneButton btnDown(35, false);
+OneButton btnMenu(32, false,false); 
+OneButton btnSet(33, false,false);
+OneButton btnUp(34, false,false);
+OneButton btnDown(35, false,false);
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
   int16_t cursorX = x;  // Vị trí x bắt đầu in
@@ -204,7 +207,9 @@ void btnMenuDuringLongPress() {
 }
 
 void btnSetClick() {
-  showSetup("SET", "OFF", "da lick");
+  const char* text = jsonDoc["main"]["main1"]["text"];
+  const char* key = jsonDoc["main"]["main1"]["key"];
+  //showSetup(key,text,"doc thanh cong");
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -249,9 +254,9 @@ void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
   u8g2.begin();  // Khởi tạo màn hình OLED
-  StaticJsonDocument<200> doc;
-
-  DeserializationError error = deserializeJson(doc, jsonString);    // Phân tích chuỗi JSON
+ 
+  StaticJsonDocument<200> jsonData;
+  DeserializationError error = deserializeJson(jsonDoc, jsonString);    // Phân tích chuỗi JSON
   if (error) {
     showSetup("Error","E002","Json Error");
     /*Serial.print(F("deserializeJson() failed: "));
@@ -266,6 +271,19 @@ void setup() {
   btnSet.attachClick(btnSetClick);
   btnSet.attachLongPressStart(btnSetLongPressStart);
   btnSet.attachDuringLongPress(btnSetDuringLongPress);
+
+   const char* main1Text = jsonDoc["main"]["main1"]["text"];
+  const char* main1Key = jsonDoc["main"]["main1"]["key"];
+  const char* child1Text = jsonDoc["main"]["main1"]["children"]["CD1"]["text"];
+  const char* child1Value = jsonDoc["main"]["main1"]["children"]["CD1"]["value"];
+  const char* child1Function = jsonDoc["main"]["main1"]["children"]["CD1"]["function"];
+
+  // In ra các giá trị đã truy cập
+  Serial.println(main1Text);         // In ra "Cài Đặt"
+  Serial.println(main1Key);          // In ra "CD"
+  Serial.println(child1Text);        // In ra "Text1"
+  Serial.println(child1Value);       // In ra "GT1"
+  Serial.println(child1Function);     // In ra "CN1"
 }
 
 void loop() {
