@@ -13,13 +13,13 @@ StaticJsonDocument<200> jsonDoc;
 const char* jsonString = R"({
   "main": {
     "main1": {
-      "text": "Cài Đặt",
+      "text": "CAI DAT",
       "key": "CD",
       "children": {
         "CD1": {
           "text": "Text1",
-          "value": "GT1",
-          "function": "CN1",
+          "value": 50,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -28,8 +28,8 @@ const char* jsonString = R"({
         },
         "CD2": {
           "text": "Text2",
-          "value": "GT2",
-          "function": "CN2",
+          "value": 100,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -38,8 +38,8 @@ const char* jsonString = R"({
         },
         "CD3": {
           "text": "Text3",
-          "value": "GT3",
-          "function": "CN3",
+          "value": 200,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -48,8 +48,8 @@ const char* jsonString = R"({
         },
         "CD4": {
           "text": "Text4",
-          "value": "GT4",
-          "function": "CN4",
+          "value": 200,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -58,8 +58,8 @@ const char* jsonString = R"({
         },
         "CD5": {
           "text": "Text5",
-          "value": "GT5",
-          "function": "CN5",
+          "value": 300,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -68,8 +68,8 @@ const char* jsonString = R"({
         },
         "CD6": {
           "text": "Text6",
-          "value": "GT6",
-          "function": "CN6",
+          "value": 400,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -78,8 +78,8 @@ const char* jsonString = R"({
         },
         "CD7": {
           "text": "Text7",
-          "value": "GT7",
-          "function": "CN7",
+          "value": 500,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -88,8 +88,8 @@ const char* jsonString = R"({
         },
         "CD8": {
           "text": "Text8",
-          "value": "GT8",
-          "function": "CN8",
+          "value": 600,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -98,8 +98,8 @@ const char* jsonString = R"({
         },
         "CD9": {
           "text": "Text9",
-          "value": "GT9",
-          "function": "CN9",
+          "value": 700,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -108,8 +108,8 @@ const char* jsonString = R"({
         },
         "CD10": {
           "text": "Text10",
-          "value": "GT10",
-          "function": "CN10",
+          "value": 500,
+          "function": 1,
           "belonging": "",
           "minValue": 1,
           "maxValue": 1000,
@@ -119,12 +119,12 @@ const char* jsonString = R"({
       }
     },
     "main2": {
-      "text": "Kiểm Tra",
+      "text": "KIEM TRA",
       "key": "KT",
       "children": {}
     },
     "main3": {
-      "text": "Giới Thiệu",
+      "text": "GIOI THIEU",
       "key": "GT",
       "children": {}
     }
@@ -138,10 +138,20 @@ const int btnSet = 33;
 const int btnUp = 34;
 const int btnDown = 35;*/
 
+
+int btnSetDebounceMill = 0;
+int btnSetPressMill = 2000;
+int pIndex = 1;
+int menuIndex = 1;
 OneButton btnMenu(32, false,false); 
 OneButton btnSet(33, false,false);
 OneButton btnUp(34, false,false);
 OneButton btnDown(35, false,false);
+
+const char* menu1;
+const char* menu2;
+const char* menu3;
+const char* displayScreen;
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
   int16_t cursorX = x;  // Vị trí x bắt đầu in
@@ -175,6 +185,28 @@ void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_
   }
 }
 
+void showList(int indexNum){
+  /*JsonObject sensors = jsonDoc["main"]
+  size_t sensorCount = sensors.size();
+
+  for (int i = 0; i < sensorCount; i++)*/
+
+  menu1 = jsonDoc["main"]["main1"]["text"];
+  menu2 = jsonDoc["main"]["main2"]["text"];
+  menu3 = jsonDoc["main"]["main3"]["text"];
+
+  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
+  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
+
+  
+  u8g2.drawStr(12, 16, menu1);  // Hiển thị danh mục 1
+  u8g2.drawStr(12, 32, menu2);  // Hiển thị danh mục 2
+  u8g2.drawStr(12, 48, menu3);  // Hiển thị danh mục 3
+
+  u8g2.drawStr(0, indexNum * 16, ">");  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
+  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
+  displayScreen = "MENU";
+}
 
 void showSetup(const char* setUpCode, const char* value, const char* text) {   // Hàm hiển thị màn hình với thông tin mã cài đặt và giá trị
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
@@ -193,24 +225,43 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {   /
 }
 
 void btnMenuClick() {
-  Serial.println("Button Clicked (nhấn nhả)");
+  //Serial.println("Button Clicked (nhấn nhả)");
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnMenuLongPressStart() {
-  Serial.println("Button Long Press Started (bắt đầu nhấn giữ)");
+  //Serial.println("Button Long Press Started (BtnMenu)");
 }
 
 // Hàm callback khi nút đang được giữ
 void btnMenuDuringLongPress() {
-  Serial.println("Button is being Long Pressed (đang giữ)");
+  //Serial.println("Button is being Long Pressed (BtnMenu)");
 }
 
 void btnSetClick() {
-  const char* text = jsonDoc["main"]["main1"]["text"];
-  const char* key = jsonDoc["main"]["main1"]["key"];
-  //showSetup(key,text,"doc thanh cong");
+  if (displayScreen == "MENU") {
+    // Đặt pIndex bằng 1 hoặc giá trị bạn muốn
+    int pIndex = 1;
+
+    // Truy xuất key của mục menu hiện tại
+    const char* code = jsonDoc["main"]["main" + String(menuIndex)]["key"];
+
+    // Tạo setupCode dựa trên key và pIndex
+    String setupCodeStr = String(code) + String(pIndex);  // Sử dụng String để tạo chuỗi
+    const char* setupCode = setupCodeStr.c_str();  // Chuyển đổi sang const char*
+
+    // Truy xuất value và text từ JSON
+    int value = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["value"]; // Giá trị là int
+    const char* text = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["text"]; // text là const char*
+
+    // Hiển thị giá trị thiết lập
+    showSetup(setupCode, value, text); // Gọi hàm với kiểu dữ liệu phù hợp
+
+    // Chuyển màn hình sau khi xử lý
+    displayScreen = "Screen2";
+  }
 }
+
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
@@ -223,31 +274,41 @@ void btnSetDuringLongPress() {
 }
 
 void btnUpClick() {
-  Serial.println("Button Clicked (nhấn nhả)");
+  if (menuIndex + 1 > 3) {
+    menuIndex = 1;  // Khi chỉ số vượt quá giới hạn, quay lại đầu danh sách
+  } else {
+    menuIndex++;    // Tăng menuIndex lên 1
+  }
+  showList(menuIndex);  // Hiển thị danh sách với chỉ số mới
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
-void btnUpLongPressStart() {
-  Serial.println("Button Long Press Started (bắt đầu nhấn giữ)");
+void btnUpLongPressStart() { 
+  //Serial.println("Button Long Press Started (btnUp)");
 }
 
 // Hàm callback khi nút đang được giữ
 void btnUpDuringLongPress() {
-  Serial.println("Button is being Long Pressed (đang giữ)");
+  //Serial.println("Button is being Long Pressed (btnUp)");
 }
 
 void btnDownClick() {
-  Serial.println("Button Clicked (nhấn nhả)");
+  if (menuIndex - 1 < 1) {
+    menuIndex = 3;  // Khi chỉ số nhỏ hơn giới hạn, quay lại cuối danh sách
+  } else {
+    menuIndex--;    // Giảm menuIndex đi 1
+  }
+  showList(menuIndex);  // Hiển thị danh sách với chỉ số mới
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnDownLongPressStart() {
-  Serial.println("Button Long Press Started (bắt đầu nhấn giữ)");
+  //Serial.println("Button Long Press Started (btnDown)");
 }
 
 // Hàm callback khi nút đang được giữ
 void btnDownDuringLongPress() {
-  Serial.println("Button is being Long Pressed (đang giữ)");
+  //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
 void setup() {
@@ -255,15 +316,13 @@ void setup() {
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
   u8g2.begin();  // Khởi tạo màn hình OLED
  
-  StaticJsonDocument<200> jsonData;
   DeserializationError error = deserializeJson(jsonDoc, jsonString);    // Phân tích chuỗi JSON
   if (error) {
     showSetup("Error","E002","Json Error");
     /*Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
+    //Serial.println(error.f_str());
     return;*/
   }
-
   btnMenu.attachClick(btnMenuClick);
   btnMenu.attachLongPressStart(btnMenuLongPressStart);
   btnMenu.attachDuringLongPress(btnMenuDuringLongPress);
@@ -272,20 +331,32 @@ void setup() {
   btnSet.attachLongPressStart(btnSetLongPressStart);
   btnSet.attachDuringLongPress(btnSetDuringLongPress);
 
-   const char* main1Text = jsonDoc["main"]["main1"]["text"];
-  const char* main1Key = jsonDoc["main"]["main1"]["key"];
-  const char* child1Text = jsonDoc["main"]["main1"]["children"]["CD1"]["text"];
-  const char* child1Value = jsonDoc["main"]["main1"]["children"]["CD1"]["value"];
-  const char* child1Function = jsonDoc["main"]["main1"]["children"]["CD1"]["function"];
+  btnUp.attachClick(btnUpClick);
+  btnUp.attachLongPressStart(btnUpLongPressStart);
+  btnUp.attachDuringLongPress(btnUpDuringLongPress);
 
-  // In ra các giá trị đã truy cập
-  Serial.println(main1Text);         // In ra "Cài Đặt"
-  Serial.println(main1Key);          // In ra "CD"
-  Serial.println(child1Text);        // In ra "Text1"
-  Serial.println(child1Value);       // In ra "GT1"
-  Serial.println(child1Function);     // In ra "CN1"
-}
+  btnDown.attachClick(btnDownClick);  
+  btnDown.attachLongPressStart(btnDownLongPressStart);
+  btnDown.attachDuringLongPress(btnDownDuringLongPress);
+
+  btnMenu.setDebounceMs(btnSetDebounceMill);
+  btnSet.setDebounceMs(btnSetDebounceMill);
+  btnUp.setDebounceMs(btnSetDebounceMill);
+  btnDown.setDebounceMs(btnSetDebounceMill);
+
+  btnMenu.setPressMs(btnSetPressMill);
+  btnSet.setPressMs(btnSetPressMill);
+  btnUp.setPressMs(btnSetPressMill);
+  btnDown.setPressMs(btnSetPressMill);
+  
+
+
+} 
 
 void loop() {
+  btnMenu.tick();
   btnSet.tick();
+  btnUp.tick();
+  btnDown.tick(); 
+  showList(menuIndex);
 }
