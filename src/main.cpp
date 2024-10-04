@@ -247,15 +247,14 @@ void btnSetClick() {
     const char* code = jsonDoc["main"]["main" + String(menuIndex)]["key"];
 
     // Tạo setupCode dựa trên key và pIndex
-    String setupCodeStr = String(code) + String(pIndex);  // Sử dụng String để tạo chuỗi
-    const char* setupCode = setupCodeStr.c_str();  // Chuyển đổi sang const char*
+    String setupCode = String(code) + String(pIndex);  // Chuyển đổi thành String
 
     // Truy xuất value và text từ JSON
-    int value = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["value"]; // Giá trị là int
-    const char* text = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["text"]; // text là const char*
+    const char* value = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["value"];
+    const char* text = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["text"];
 
     // Hiển thị giá trị thiết lập
-    showSetup(setupCode, value, text); // Gọi hàm với kiểu dữ liệu phù hợp
+    showSetup(setupCode.c_str(), value, text);  // Chuyển đổi về const char*
 
     // Chuyển màn hình sau khi xử lý
     displayScreen = "Screen2";
