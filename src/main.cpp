@@ -151,7 +151,7 @@ OneButton btnDown(35, false,false);
 const char* menu1;
 const char* menu2;
 const char* menu3;
-const char* displayScreen;
+const char* displayScreen = "MENU";
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
   int16_t cursorX = x;  // Vị trí x bắt đầu in
@@ -224,8 +224,28 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {   /
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
+void loadJsonSettings() {
+    const char* code = jsonDoc["main"]["main" + String(menuIndex)]["key"]; // Truy xuất key của mục menu hiện tại
+
+    String setupCode = String(code) + String(pIndex); // Tạo setupCode dựa trên key và pIndex
+
+    int valueInt = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["value"]; // Truy xuất value và text từ JSON
+    const char* text = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["text"];
+
+    String valueStr = String(valueInt); // Chuyển đổi value từ int thành String, sau đó thành const char*
+    const char* value = valueStr.c_str();
+
+    showSetup(setupCode.c_str(), value, text); // Hiển thị giá trị thiết lập
+
+    displayScreen = "ScreenCD"; // Chuyển màn hình sau khi xử lý
+}
+
 void btnMenuClick() {
   //Serial.println("Button Clicked (nhấn nhả)");
+  if (displayScreen == "ScreenSD") {
+    displayScreen = "MENU";
+    showList(menuIndex);  // Hiển thị danh sách menu hiện tại
+  }
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -240,27 +260,10 @@ void btnMenuDuringLongPress() {
 
 void btnSetClick() {
   if (displayScreen == "MENU") {
-    // Đặt pIndex bằng 1 hoặc giá trị bạn muốn
-    int pIndex = 1;
-
-    // Truy xuất key của mục menu hiện tại
-    const char* code = jsonDoc["main"]["main" + String(menuIndex)]["key"];
-
-    // Tạo setupCode dựa trên key và pIndex
-    String setupCode = String(code) + String(pIndex);  // Chuyển đổi thành String
-
-    // Truy xuất value và text từ JSON
-    const char* value = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["value"];
-    const char* text = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCode]["text"];
-
-    // Hiển thị giá trị thiết lập
-    showSetup(setupCode.c_str(), value, text);  // Chuyển đổi về const char*
-
-    // Chuyển màn hình sau khi xử lý
-    displayScreen = "Screen2";
+    pIndex = 1;
+    loadJsonSettings(); // Hiển thị giá trị thiết lập
   }
 }
-
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
@@ -273,12 +276,17 @@ void btnSetDuringLongPress() {
 }
 
 void btnUpClick() {
-  if (menuIndex + 1 > 3) {
-    menuIndex = 1;  // Khi chỉ số vượt quá giới hạn, quay lại đầu danh sách
-  } else {
-    menuIndex++;    // Tăng menuIndex lên 1
+  if (displayScreen == "MENU") {
+    if (menuIndex + 1 > 3) {
+      menuIndex = 1;  // Khi chỉ số vượt quá giới hạn, quay lại đầu danh sách
+    } else {
+      menuIndex++;    // Tăng menuIndex lên 1
+    }
+    showList(menuIndex);  // Hiển thị danh sách với chỉ số mới
+  } else if (displayScreen == "ScreenCD"){
+    pIndex ++;
+    loadJsonSettings(); // Hiển thị giá trị thiết lập
   }
-  showList(menuIndex);  // Hiển thị danh sách với chỉ số mới
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -292,12 +300,17 @@ void btnUpDuringLongPress() {
 }
 
 void btnDownClick() {
-  if (menuIndex - 1 < 1) {
-    menuIndex = 3;  // Khi chỉ số nhỏ hơn giới hạn, quay lại cuối danh sách
-  } else {
-    menuIndex--;    // Giảm menuIndex đi 1
+  if (displayScreen == "MENU") {
+    if (menuIndex - 1 < 1) {
+      menuIndex = 3;  // Khi chỉ số nhỏ hơn giới hạn, quay lại cuối danh sách
+    } else {
+      menuIndex--;    // Giảm menuIndex đi 1
+    }
+    showList(menuIndex);  // Hiển thị danh sách với chỉ số mới
+  } else if (displayScreen == "ScreenCD"){
+    pIndex --;
+    loadJsonSettings(); // Hiển thị giá trị thiết lập
   }
-  showList(menuIndex);  // Hiển thị danh sách với chỉ số mới
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -347,8 +360,6 @@ void setup() {
   btnSet.setPressMs(btnSetPressMill);
   btnUp.setPressMs(btnSetPressMill);
   btnDown.setPressMs(btnSetPressMill);
-  
-
 
 } 
 
@@ -357,5 +368,4 @@ void loop() {
   btnSet.tick();
   btnUp.tick();
   btnDown.tick(); 
-  showList(menuIndex);
 }
