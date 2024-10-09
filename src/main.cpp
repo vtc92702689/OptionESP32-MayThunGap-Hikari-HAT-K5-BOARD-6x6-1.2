@@ -4,6 +4,7 @@
 #include <Preferences.h>
 #include <ArduinoJson.h>
 #include <OneButton.h>
+#include <LittleFS.h>
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
 
@@ -151,7 +152,7 @@ int maxValue = 0;
 int minValue = 0;
 int maxLength = 0; //Số kí tự hiển thị trên func showSetup
 int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 = chục, ...)
-int currentValue = 0; // Giá trị hiện tại, ví dụ ban đầu
+int currentValue;
 
 OneButton btnMenu(32, false,false); 
 OneButton btnSet(33, false,false);
@@ -165,6 +166,8 @@ String displayScreen = "MENU";
 String setupCodeStr;
 String valueStr;
 String textStr;
+String keyStr;
+String childrenStr;
 
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
@@ -202,8 +205,20 @@ void log(String mes){
   Serial.println(mes);
 }
 
-void showList(int indexNum){
+void writeFile(JsonDocument& doc, const char* path) {
+    File file = LittleFS.open(path, "w");
+    if (!file) {
+        Serial.println("Failed to open file for writing");
+        return;
+    }
 
+    // Chuyển đổi JSON thành chuỗi và ghi vào tệp
+    serializeJson(doc, file);
+    file.close();
+    Serial.println("File written successfully!");
+}
+
+void showList(int indexNum){
   menu1 = jsonDoc["main"]["main1"]["text"];
   menu2 = jsonDoc["main"]["main2"]["text"];
   menu3 = jsonDoc["main"]["main3"]["text"];
@@ -220,7 +235,7 @@ void showList(int indexNum){
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
-void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
+void showSetup(const char* setUpCode, const char* value, const char* text) {  // Thêm maxValue vào tham số
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
   u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
 
@@ -228,16 +243,30 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {   /
   snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setUpCode);  // Nối mã cài đặt với dấu ":"
   
   u8g2.drawStr(0, 18, tempSetUpCode);  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
-  
+
   u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
   
+  // Kiểm tra xem value có phải là số hay không
+  char* endPtr;
+  long intValue = strtol(value, &endPtr, 10);  // Chuyển đổi value thành số
+  bool isNumber = (*endPtr == '\0'); // Kiểm tra nếu đã chuyển thành số hoàn toàn
+
+  char displayValue[16]; // Chuỗi chứa giá trị để hiển thị
+
+  // Nếu là số và nằm trong giới hạn, hiển thị nó dưới dạng số
+  if (isNumber && intValue >= 0 && intValue <= maxValue) {
+      snprintf(displayValue, sizeof(displayValue), "%ld", intValue); // Chuyển đổi thành chuỗi số
+  } else {
+      snprintf(displayValue, sizeof(displayValue), "%s", value); // Hiển thị như một chuỗi
+  }
+
   // Chuyển đổi maxValue sang chuỗi
   char maxValueStr[16]; // Chuỗi chứa giá trị maxValue sau khi chuyển đổi
   snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  // Chuyển maxValue thành chuỗi
   
   // Tính toán độ dài của value và maxValueStr
-  int valueLength = strlen(value);
-  maxLength = strlen(maxValueStr);
+  int valueLength = strlen(displayValue);
+  int maxLength = strlen(maxValueStr);
 
   // Giới hạn độ dài value không vượt quá chiều dài maxValue
   if (valueLength > maxLength) {
@@ -245,12 +274,12 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {   /
   }
 
   // Vị trí bắt đầu cho ký tự đầu tiên căn lề từ phải
-  int startX = 128 - (valueLength * 10); // 10 là độ rộng trung bình của một ký tự (nếu sử dụng font có kích thước tiêu chuẩn)
+  int startX = 128 - 10; // Bắt đầu từ vị trí rìa phải (x = 118)
 
-  // Vẽ từng ký tự từ value lên màn hình
+  // Vẽ từng ký tự từ displayValue lên màn hình, bắt đầu từ ký tự cuối cùng
   for (int i = 0; i < valueLength; i++) {
-      char temp[2] = {value[i], '\0'}; // Lấy từng ký tự và biến nó thành chuỗi
-      u8g2.drawStr(startX + (i * 10), 18, temp); // Vẽ ký tự tại vị trí tương ứng
+      char temp[2] = {displayValue[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
+      u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
   }
 
   u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình (tọa độ từ x=0 đến x=128)
@@ -259,47 +288,71 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {   /
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
-void showEdit(int columnIndex) { 
+void showEdit(int columnIndex) {
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
   u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
   char tempSetUpCode[64];    // Tạo một chuỗi tạm chứa mã cài đặt và dấu ";"
   snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setupCodeStr.c_str());  // Nối mã cài đặt với dấu ":"
-  //log(setupCodeStr);
+  
   u8g2.drawStr(0, 18, tempSetUpCode);  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
 
   u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
 
-  char maxValueStr[16]; // Chuỗi chứa giá trị maxValue sau khi chuyển đổi
-  snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  // Chuyển maxValue thành chuỗi
+  // Chuyển đổi maxValue thành chuỗi
+  char maxValueStr[16]; 
+  snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  
 
   const char* valueChr = valueStr.c_str();
   int valueLength = strlen(valueChr);
-  maxLength = strlen(maxValueStr);
+  int maxLength = strlen(maxValueStr);
 
   // Giới hạn độ dài value không vượt quá chiều dài maxValue
   if (valueLength > maxLength) {
       valueLength = maxLength;
   }
-  log(String(columnIndex));
-  int startX = 128 - (valueLength * 10); // 10 là độ rộng trung bình của một ký tự (nếu sử dụng font có kích thước tiêu chuẩn)
 
-    for (int i = 0; i < maxLength; i++) {
-      char temp[2] = {valueChr[i], '\0'}; // Lấy từng ký tự và biến nó thành chuỗi
-      if (i == columnIndex){
-        u8g2.setDrawColor(1);  // Màu nền
-        u8g2.drawBox(startX + (i * 10) - 1, 5, 10, 18);
-        u8g2.setDrawColor(0);  // Màu chữ
-        u8g2.drawStr(startX + (i * 10), 18, temp); // Vẽ ký tự tại vị trí tương ứng
-        u8g2.setDrawColor(1);
-      } else {
-        u8g2.drawStr(startX + (i * 10), 18, temp); // Vẽ ký tự tại vị trí tương ứng
-      }
+  // Kiểm tra xem value có phải là số hay không
+  char* endPtr;
+  long intValue = strtol(valueChr, &endPtr, 10);  // Chuyển đổi value thành số
+  bool isNumber = (*endPtr == '\0'); // Kiểm tra nếu đã chuyển thành số hoàn toàn
+
+  // Nếu là số và nằm trong giới hạn, hiển thị nó dưới dạng số
+  char displayValue[16]; // Chuỗi để hiển thị giá trị
+  if (isNumber && intValue >= 0 && intValue <= maxValue) {
+      snprintf(displayValue, sizeof(displayValue), "%ld", intValue); // Chuyển đổi thành chuỗi số
+  } else {
+      snprintf(displayValue, sizeof(displayValue), "%s", valueChr); // Hiển thị như một chuỗi
+  }
+
+  // Tính toán độ dài của displayValue
+  valueLength = strlen(displayValue);
+  maxLength = strlen(maxValueStr);
+
+  // Giới hạn độ dài displayValue không vượt quá chiều dài maxValue
+  if (valueLength > maxLength) {
+      valueLength = maxLength;
+  }
+
+  int startX = 128 - 10; // 10 là độ rộng trung bình của một ký tự
+
+  for (int i = 0; i < maxLength; i++) {
+    char temp[2] = {displayValue[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
+    if (i == columnIndex) {
+      u8g2.setDrawColor(1);  // Màu nền
+      u8g2.drawBox(startX - (i * 10) - 1, 5, 10, 18);
+      u8g2.setDrawColor(0);  // Màu chữ
+      u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
+      u8g2.setDrawColor(1);
+    } else {
+      u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
     }
+  }
 
-  u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình (tọa độ từ x=0 đến x=128)
-  wrapText(textStr.c_str(), 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
+  u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình
+  wrapText(textStr.c_str(), 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
+
 
 void loadJsonSettings() {
     try {
@@ -321,9 +374,9 @@ void loadJsonSettings() {
 
         maxValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["maxValue"];
         minValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["minValue"];
-        currentValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"];
 
         textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
+        keyStr = String(code);
 
         showSetup(setupCodeStr.c_str(), valueStr.c_str() , textStr.c_str()); // Hiển thị thông tin cấu hình bằng cách gọi hàm showSetup
     } catch (const std::exception& e) { // Bắt lỗi nếu có ngoại lệ
@@ -334,6 +387,29 @@ void loadJsonSettings() {
     }
 }
 
+void editValue(const char* Calculations) {
+    currentValue = valueStr.toInt();
+    int newValue;
+    int factor = pow(10, columnIndex); // Tính hàng (đơn vị, chục, trăm, v.v.)
+
+    // Tăng hoặc giảm giá trị tại hàng đang chọn
+    if (strcmp(Calculations, "addition") == 0) {
+        newValue = currentValue + factor;
+    } else if (strcmp(Calculations, "subtraction") == 0) {
+        newValue = currentValue - factor;
+    }
+
+    // Kiểm tra nếu newValue nằm trong khoảng minValue và maxValue
+    if (newValue >= minValue && newValue <= maxValue) {
+        currentValue = newValue; // Cập nhật currentValue nếu newValue hợp lệ
+    }
+
+    // Chuyển giá trị thành chuỗi để hiển thị
+    valueStr = String(currentValue);
+
+    // Gọi lại hàm showEdit để cập nhật màn hình
+    showEdit(columnIndex);
+}
 
 void btnMenuClick() {
   //Serial.println("Button Clicked (nhấn nhả)");
@@ -360,12 +436,12 @@ void btnSetClick() {
     loadJsonSettings(); // Hiển thị giá trị thiết lập
     displayScreen = "ScreenCD"; // Chuyển màn hình sau khi xử lý dữ liệu thành công
   } else if (displayScreen == "ScreenCD"){
-    columnIndex = maxLength;
+    columnIndex = maxLength-1;
     showEdit(columnIndex);
     displayScreen = "ScreenEdit";
   } else if (displayScreen == "ScreenEdit")  {
     if (columnIndex - 1 < 0){
-      columnIndex = maxLength;
+      columnIndex = maxLength-1;
     } else {
       columnIndex --;
     }
@@ -375,12 +451,14 @@ void btnSetClick() {
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
-  showSetup("Setup", "OFF", "BatDauNhanGiu");
+  jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
+  log("Đã lưu giá trị:" + valueStr + " vào thẻ " + keyStr + "/" + setupCodeStr);
+  writeFile(jsonDoc,"/config.json");
 }
 
 // Hàm callback khi nút đang được giữ
 void btnSetDuringLongPress() {
-  showSetup("Setup", "OFF", "Dang giu nut");
+  //showSetup("Setup", "OFF", "Dang giu nut");
 }
 
 void btnUpClick() {
@@ -399,8 +477,8 @@ void btnUpClick() {
     }
     loadJsonSettings(); // Hiển thị giá trị thiết lập
   } else if (displayScreen == "ScreenEdit") {
-    columnIndex ++;
-    showEdit(columnIndex);
+    editValue("addition");
+    log("Value:" + valueStr);
   }
 }
 
@@ -430,8 +508,8 @@ void btnDownClick() {
     }
     loadJsonSettings(); // Hiển thị giá trị thiết lập
   } else if (displayScreen == "ScreenEdit"){
-    columnIndex --;
-    showEdit(columnIndex);
+    editValue("subtraction");
+    log("Value:" + valueStr);
   }
 }
 
@@ -445,18 +523,14 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+
 void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
+
   u8g2.begin();  // Khởi tạo màn hình OLED
- 
-  DeserializationError error = deserializeJson(jsonDoc, jsonString);    // Phân tích chuỗi JSON
-  if (error) {
-    showSetup("Error","E002","Json Error");
-    /*Serial.print(F("deserializeJson() failed: "));
-    //Serial.println(error.f_str());
-    return;*/
-  }
+
+  
   btnMenu.attachClick(btnMenuClick);
   btnMenu.attachLongPressStart(btnMenuLongPressStart);
   btnMenu.attachDuringLongPress(btnMenuDuringLongPress);
@@ -483,7 +557,65 @@ void setup() {
   btnUp.setPressMs(btnSetPressMill);
   btnDown.setPressMs(btnSetPressMill);
 
-} 
+  if (!LittleFS.begin()) {
+    showSetup("Error", "E003", "LittleFS Mount Failed");
+    Serial.println("LittleFS Mount Failed");
+    DeserializationError error = deserializeJson(jsonDoc, jsonString); // Phân tích chuỗi JSON
+    if (error) {
+        showSetup("Error", "E002", "Json Error");
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
+    Serial.println("Read Data From JsonString");
+    return;
+  }
+
+  const char* filePath = "/config.json";
+
+  // Kiểm tra tệp có thể đọc được không
+  File file = LittleFS.open(filePath, "r");
+  if (!file) {
+      // Nếu không đọc được tệp, ghi jsonString vào tệp
+      Serial.println("File not found, creating a new one...");
+
+      // Mở tệp để ghi
+      file = LittleFS.open(filePath, "w");
+      if (!file) {
+          showSetup("Error", "E001", "LittleFS Error");
+          Serial.println("Failed to create file");
+          return;
+      }
+      
+      // Ghi nội dung vào tệp
+      file.print(jsonString);
+      file.close();
+      Serial.println("File written successfully!");
+
+      // Mở lại file sau khi ghi thành công
+      file = LittleFS.open(filePath, "r");
+      if (!file) {
+          showSetup("Error", "E004", "Failed to Re-open File");
+          Serial.println("Failed to re-open file");
+          return;
+      }
+  }
+
+  // Đọc nội dung tệp vào bộ nhớ
+  String content = file.readString();
+  file.close(); // Đóng tệp sau khi đọc
+
+  // Sử dụng ArduinoJson để phân tích cú pháp JSON
+  DeserializationError error = deserializeJson(jsonDoc, content); // Phân tích chuỗi JSON
+  if (error) {
+      showSetup("Error", "E002", "Json Error");
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      return;
+  }
+
+  // Nếu mọi thứ thành công, tiếp tục với quá trình cài đặt của bạn
+}
 
 void loop() {
   btnMenu.tick();
