@@ -123,14 +123,46 @@ const char* jsonString = R"({
     "main2": {
       "text": "KIEM TRA",
       "key": "KT",
-      "children": {},
-      "totalChildren": 0
+      "children": {
+        "KT1": {
+          "key": "KT1",
+          "text": "TEST MODE",
+          "defaultValue": 1,
+          "configuredValue": 1,
+          "minValue": 1,
+          "maxValue": 20,
+          "accessAllowed": true,
+          "editAllowed": true
+        },
+        "KT2": {
+          "key": "KT2",
+          "text": "TEST IO",
+          "defaultValue": 1,
+          "configuredValue": 1,
+          "minValue": 1,
+          "maxValue": 20,
+          "accessAllowed": true,
+          "editAllowed": true
+        }
+      },
+      "totalChildren": 2
     },
     "main3": {
       "text": "GIOI THIEU",
       "key": "GT",
-      "children": {},
-      "totalChildren": 0
+      "children": {
+        "GT1": {
+          "key": "GT1",
+          "text": "DKien Design",
+          "defaultValue": 1,
+          "configuredValue": 1,
+          "minValue": 1,
+          "maxValue": 20,
+          "accessAllowed": true,
+          "editAllowed": true
+        }
+      },
+      "totalChildren": 1
     }
   }
 })";
@@ -143,8 +175,8 @@ const int btnUp = 34;
 const int btnDown = 35;*/
 
 
-int btnSetDebounceMill = 0;  // thời gian chống nhiễu phím
-int btnSetPressMill = 2000;  // thời gian nhấn giữ phím
+int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
+int btnSetPressMill = 1000;  // thời gian nhấn giữ phím
 int pIndex = 1;
 int menuIndex = 1;
 int totalChildren; //Tổng số tệp con trong Func loadJsonSettings
@@ -167,7 +199,6 @@ String setupCodeStr;
 String valueStr;
 String textStr;
 String keyStr;
-String childrenStr;
 
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
@@ -235,7 +266,7 @@ void showList(int indexNum){
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
-void showSetup(const char* setUpCode, const char* value, const char* text) {  // Thêm maxValue vào tham số
+void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
   u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
 
@@ -243,42 +274,31 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {  //
   snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setUpCode);  // Nối mã cài đặt với dấu ":"
   
   u8g2.drawStr(0, 18, tempSetUpCode);  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
-
+  
   u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
   
-  // Kiểm tra xem value có phải là số hay không
-  char* endPtr;
-  long intValue = strtol(value, &endPtr, 10);  // Chuyển đổi value thành số
-  bool isNumber = (*endPtr == '\0'); // Kiểm tra nếu đã chuyển thành số hoàn toàn
-
-  char displayValue[16]; // Chuỗi chứa giá trị để hiển thị
-
-  // Nếu là số và nằm trong giới hạn, hiển thị nó dưới dạng số
-  if (isNumber && intValue >= 0 && intValue <= maxValue) {
-      snprintf(displayValue, sizeof(displayValue), "%ld", intValue); // Chuyển đổi thành chuỗi số
-  } else {
-      snprintf(displayValue, sizeof(displayValue), "%s", value); // Hiển thị như một chuỗi
-  }
-
   // Chuyển đổi maxValue sang chuỗi
   char maxValueStr[16]; // Chuỗi chứa giá trị maxValue sau khi chuyển đổi
   snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  // Chuyển maxValue thành chuỗi
   
   // Tính toán độ dài của value và maxValueStr
-  int valueLength = strlen(displayValue);
-  int maxLength = strlen(maxValueStr);
-
-  // Giới hạn độ dài value không vượt quá chiều dài maxValue
-  if (valueLength > maxLength) {
-      valueLength = maxLength;
+  int valueLength = strlen(value);
+  if (maxValue == 0){
+    maxLength = 5;
+  } else {
+    maxLength = strlen(maxValueStr);
+    // Giới hạn độ dài value không vượt quá chiều dài maxValue
+    if (valueLength > maxLength) {
+        valueLength = maxLength;
+    }
   }
 
   // Vị trí bắt đầu cho ký tự đầu tiên căn lề từ phải
   int startX = 128 - 10; // Bắt đầu từ vị trí rìa phải (x = 118)
 
-  // Vẽ từng ký tự từ displayValue lên màn hình, bắt đầu từ ký tự cuối cùng
+  // Vẽ từng ký tự từ value lên màn hình, bắt đầu từ ký tự cuối cùng
   for (int i = 0; i < valueLength; i++) {
-      char temp[2] = {displayValue[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
+      char temp[2] = {value[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
       u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
   }
 
@@ -293,66 +313,42 @@ void showEdit(int columnIndex) {
   u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
   char tempSetUpCode[64];    // Tạo một chuỗi tạm chứa mã cài đặt và dấu ";"
   snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setupCodeStr.c_str());  // Nối mã cài đặt với dấu ":"
-  
+  //log(setupCodeStr);
   u8g2.drawStr(0, 18, tempSetUpCode);  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
 
   u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
 
-  // Chuyển đổi maxValue thành chuỗi
-  char maxValueStr[16]; 
-  snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  
+  char maxValueStr[16]; // Chuỗi chứa giá trị maxValue sau khi chuyển đổi
+  snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  // Chuyển maxValue thành chuỗi
 
   const char* valueChr = valueStr.c_str();
   int valueLength = strlen(valueChr);
-  int maxLength = strlen(maxValueStr);
+  maxLength = strlen(maxValueStr);
 
   // Giới hạn độ dài value không vượt quá chiều dài maxValue
   if (valueLength > maxLength) {
       valueLength = maxLength;
   }
+  log("Value[" +String(columnIndex)+"]");
+  int startX = 128 - 10; // 10 là độ rộng trung bình của một ký tự (nếu sử dụng font có kích thước tiêu chuẩn)
 
-  // Kiểm tra xem value có phải là số hay không
-  char* endPtr;
-  long intValue = strtol(valueChr, &endPtr, 10);  // Chuyển đổi value thành số
-  bool isNumber = (*endPtr == '\0'); // Kiểm tra nếu đã chuyển thành số hoàn toàn
-
-  // Nếu là số và nằm trong giới hạn, hiển thị nó dưới dạng số
-  char displayValue[16]; // Chuỗi để hiển thị giá trị
-  if (isNumber && intValue >= 0 && intValue <= maxValue) {
-      snprintf(displayValue, sizeof(displayValue), "%ld", intValue); // Chuyển đổi thành chuỗi số
-  } else {
-      snprintf(displayValue, sizeof(displayValue), "%s", valueChr); // Hiển thị như một chuỗi
-  }
-
-  // Tính toán độ dài của displayValue
-  valueLength = strlen(displayValue);
-  maxLength = strlen(maxValueStr);
-
-  // Giới hạn độ dài displayValue không vượt quá chiều dài maxValue
-  if (valueLength > maxLength) {
-      valueLength = maxLength;
-  }
-
-  int startX = 128 - 10; // 10 là độ rộng trung bình của một ký tự
-
-  for (int i = 0; i < maxLength; i++) {
-    char temp[2] = {displayValue[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
-    if (i == columnIndex) {
-      u8g2.setDrawColor(1);  // Màu nền
-      u8g2.drawBox(startX - (i * 10) - 1, 5, 10, 18);
-      u8g2.setDrawColor(0);  // Màu chữ
-      u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
-      u8g2.setDrawColor(1);
-    } else {
-      u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
+    for (int i = 0; i < maxLength; i++) {
+      char temp[2] = {valueChr[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
+      if (i == columnIndex){
+        u8g2.setDrawColor(1);  // Màu nền
+        u8g2.drawBox(startX - (i * 10) - 1, 5, 10, 18);
+        u8g2.setDrawColor(0);  // Màu chữ
+        u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
+        u8g2.setDrawColor(1);
+      } else {
+        u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
+      }
     }
-  }
 
-  u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình
-  wrapText(textStr.c_str(), 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46
+  u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình (tọa độ từ x=0 đến x=128)
+  wrapText(textStr.c_str(), 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
-
 
 void loadJsonSettings() {
     try {
@@ -365,9 +361,11 @@ void loadJsonSettings() {
             // Nếu là số, chuyển đổi sang String
             int valueInt = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"];
             valueStr = String(valueInt); // Chuyển đổi value từ int thành String
+            currentValue = valueStr.toInt();
         } else if (jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"].is<const char*>()) {
             // Nếu là chuỗi, lấy giá trị trực tiếp
             valueStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"].as<const char*>();
+            currentValue = -1;
         } else {
             valueStr = ""; // Gán giá trị mặc định nếu không phải số hoặc chuỗi
         }
@@ -377,7 +375,7 @@ void loadJsonSettings() {
 
         textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
         keyStr = String(code);
-
+        log("Truy cập thẻ " + keyStr + "/" + setupCodeStr);
         showSetup(setupCodeStr.c_str(), valueStr.c_str() , textStr.c_str()); // Hiển thị thông tin cấu hình bằng cách gọi hàm showSetup
     } catch (const std::exception& e) { // Bắt lỗi nếu có ngoại lệ
         Serial.println("Error reading JSON data: "); // In thông báo lỗi
@@ -388,7 +386,6 @@ void loadJsonSettings() {
 }
 
 void editValue(const char* Calculations) {
-    currentValue = valueStr.toInt();
     int newValue;
     int factor = pow(10, columnIndex); // Tính hàng (đơn vị, chục, trăm, v.v.)
 
@@ -413,8 +410,7 @@ void editValue(const char* Calculations) {
 
 void btnMenuClick() {
   //Serial.println("Button Clicked (nhấn nhả)");
-  if (displayScreen == "ScreenSD") {
-    
+  if (displayScreen == "ScreenCD") {
     showList(menuIndex);  // Hiển thị danh sách menu hiện tại
     displayScreen = "MENU";
   }
@@ -452,8 +448,10 @@ void btnSetClick() {
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
   jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
-  log("Đã lưu giá trị:" + valueStr + " vào thẻ " + keyStr + "/" + setupCodeStr);
+  log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
   writeFile(jsonDoc,"/config.json");
+  loadJsonSettings();
+  displayScreen = "ScreenCD";
 }
 
 // Hàm callback khi nút đang được giữ
