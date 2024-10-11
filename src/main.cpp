@@ -411,8 +411,14 @@ void editValue(const char* Calculations) {
 void btnMenuClick() {
   //Serial.println("Button Clicked (nhấn nhả)");
   if (displayScreen == "ScreenCD") {
+    if (keyStr == "CD") {
+      writeFile(jsonDoc,"/config.json");
+    }
     showList(menuIndex);  // Hiển thị danh sách menu hiện tại
     displayScreen = "MENU";
+  } else if (displayScreen == "ScreenEdit") {
+    loadJsonSettings();
+    displayScreen = "ScreenCD";
   }
 }
 
@@ -447,11 +453,13 @@ void btnSetClick() {
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
-  jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
-  log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
-  writeFile(jsonDoc,"/config.json");
-  loadJsonSettings();
-  displayScreen = "ScreenCD";
+  if (displayScreen = "ScreenEdit"){
+    jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
+    log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
+    loadJsonSettings();
+    displayScreen = "ScreenCD";
+    //showSetup("Setup", "OFF", "Dang giu nut");
+  }
 }
 
 // Hàm callback khi nút đang được giữ
