@@ -14,7 +14,7 @@ StaticJsonDocument<200> jsonDoc;
 const char* jsonString = R"({
   "main": {
     "main1": {
-      "text": "CAI DAT",
+      "text": "Cài Đặt",
       "key": "CD",
       "children": {
         "CD1": {
@@ -121,11 +121,11 @@ const char* jsonString = R"({
       "totalChildren": 10
     },
     "main2": {
-      "text": "KIEM TRA",
-      "key": "KT",
+      "text": "CHUC NANG",
+      "key": "CN",
       "children": {
-        "KT1": {
-          "key": "KT1",
+        "CN1": {
+          "key": "CN1",
           "text": "TEST MODE",
           "defaultValue": 1,
           "configuredValue": 1,
@@ -134,8 +134,8 @@ const char* jsonString = R"({
           "accessAllowed": true,
           "editAllowed": true
         },
-        "KT2": {
-          "key": "KT2",
+        "CN2": {
+          "key": "CN2",
           "text": "TEST IO",
           "defaultValue": 1,
           "configuredValue": 1,
@@ -143,9 +143,19 @@ const char* jsonString = R"({
           "maxValue": 20,
           "accessAllowed": true,
           "editAllowed": true
+        },
+        "CN3": {
+          "key": "CN3",
+          "text": "RESET",
+          "defaultValue": 0,
+          "configuredValue": 0,
+          "minValue": 0,
+          "maxValue": 1,
+          "accessAllowed": true,
+          "editAllowed": true
         }
       },
-      "totalChildren": 2
+      "totalChildren": 3
     },
     "main3": {
       "text": "GIOI THIEU",
@@ -199,6 +209,27 @@ String setupCodeStr;
 String valueStr;
 String textStr;
 String keyStr;
+
+bool isNumeric(const char* str) {
+  // Chuỗi rỗng không được coi là số
+  if (str == nullptr || str[0] == '\0') return false;
+
+  // Nếu ký tự đầu là dấu trừ, bắt đầu kiểm tra từ ký tự thứ 2
+  int startIndex = 0;
+  if (str[0] == '-') {
+    if (str[1] == '\0') return false; // "-"" không phải là số
+    startIndex = 1; // Bỏ qua dấu trừ
+  }
+
+  // Kiểm tra từng ký tự có phải là số không
+  for (int i = startIndex; str[i] != '\0'; i++) {
+    if (!isDigit(str[i])) {
+      return false; // Nếu có ký tự không phải là số
+    }
+  }
+
+  return true; // Nếu tất cả ký tự là số
+}
 
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
@@ -268,7 +299,8 @@ void showList(int indexNum){
 
 void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
+  //u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
+  u8g2.setFont (u8g2_font_unifont_t_vietnamese2); // sử dụng tiếng Trung2 cho tất cả các glyphs của ""
 
   char tempSetUpCode[64];    // Tạo một chuỗi tạm chứa mã cài đặt và dấu ";"
   snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setUpCode);  // Nối mã cài đặt với dấu ":"
@@ -283,7 +315,7 @@ void showSetup(const char* setUpCode, const char* value, const char* text) {   /
   
   // Tính toán độ dài của value và maxValueStr
   int valueLength = strlen(value);
-  if (maxValue == 0){
+  if (!isNumeric(value)){
     maxLength = 5;
   } else {
     maxLength = strlen(maxValueStr);
@@ -385,6 +417,30 @@ void loadJsonSettings() {
     }
 }
 
+void reSet(){
+   const char* filePath = "/config.json";
+
+  // Kiểm tra tệp có thể đọc được không
+  File file = LittleFS.open(filePath, "r");
+  if (!file) {
+      // Nếu không đọc được tệp, ghi jsonString vào tệp
+      Serial.println("File not found, creating a new one...");
+
+      // Mở tệp để ghi
+      file = LittleFS.open(filePath, "w");
+      if (!file) {
+          showSetup("Error", "E001", "LittleFS Error");
+          Serial.println("Failed to create file");
+          return;
+      }
+      
+      // Ghi nội dung vào tệp
+      file.print(jsonString);
+      file.close();
+      Serial.println("File written successfully!");
+  };
+}
+
 void editValue(const char* Calculations) {
     int newValue;
     int factor = pow(10, columnIndex); // Tính hàng (đơn vị, chục, trăm, v.v.)
@@ -454,11 +510,16 @@ void btnSetClick() {
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
   if (displayScreen = "ScreenEdit"){
-    jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
-    log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
-    loadJsonSettings();
-    displayScreen = "ScreenCD";
-    //showSetup("Setup", "OFF", "Dang giu nut");
+    if (keyStr == "CD"){
+      jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
+      log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
+      loadJsonSettings();
+      displayScreen = "ScreenCD";
+    } else if (keyStr == "CN"){
+      if (setupCodeStr == "CN3" && currentValue == 1){
+        reSet();
+      }
+    }
   }
 }
 
@@ -535,7 +596,7 @@ void setup() {
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
 
   u8g2.begin();  // Khởi tạo màn hình OLED
-
+  u8g2.enableUTF8Print (); // kích hoạt hỗ trợ UTF8 cho chức năng Arduino print () 
   
   btnMenu.attachClick(btnMenuClick);
   btnMenu.attachLongPressStart(btnMenuLongPressStart);
@@ -607,9 +668,14 @@ void setup() {
       }
   }
 
-  // Đọc nội dung tệp vào bộ nhớ
-  String content = file.readString();
-  file.close(); // Đóng tệp sau khi đọc
+  const size_t capacity = 1024;  // Kích thước buffer, có thể thay đổi theo dung lượng file
+  char content[capacity];        // Mảng chứa nội dung file
+
+  if (file) {
+    size_t len = file.readBytes(content, capacity); // Đọc nội dung file vào buffer
+    content[len] = '\0';  // Đảm bảo buffer kết thúc bằng null terminator
+  }
+  file.close(); // Đóng file
 
   // Sử dụng ArduinoJson để phân tích cú pháp JSON
   DeserializationError error = deserializeJson(jsonDoc, content); // Phân tích chuỗi JSON
@@ -619,7 +685,6 @@ void setup() {
       Serial.println(error.f_str());
       return;
   }
-
   // Nếu mọi thứ thành công, tiếp tục với quá trình cài đặt của bạn
 }
 
