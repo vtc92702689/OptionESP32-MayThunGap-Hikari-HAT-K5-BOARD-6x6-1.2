@@ -14,18 +14,20 @@ StaticJsonDocument<200> jsonDoc;
 const char* jsonString = R"({
   "main": {
     "main1": {
-      "text": "Cài Đặt",
+      "text": "CAI DAT",
       "key": "CD",
       "children": {
         "CD1": {
           "key": "CD1",
           "text": "Text1",
-          "defaultValue": 50,
-          "configuredValue": 50,
+          "defaultValue": 1,
+          "configuredValue": 1,
           "minValue": 1,
-          "maxValue": 1000,
+          "maxValue": 3,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": true,
+          "explanationDetails": "Mode1,Mode2,Mode3"
         },
         "CD2": {
           "key": "CD2",
@@ -35,7 +37,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD3": {
           "key": "CD3",
@@ -45,7 +49,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD4": {
           "key": "CD4",
@@ -55,7 +61,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD5": {
           "key": "CD5",
@@ -65,7 +73,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD6": {
           "key": "CD6",
@@ -75,7 +85,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD7": {
           "key": "CD7",
@@ -85,7 +97,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD8": {
           "key": "CD8",
@@ -95,7 +109,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD9": {
           "key": "CD9",
@@ -105,7 +121,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CD10": {
           "key": "CD10",
@@ -115,7 +133,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         }
       },
       "totalChildren": 10
@@ -132,7 +152,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 20,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CN2": {
           "key": "CN2",
@@ -142,7 +164,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 20,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         },
         "CN3": {
           "key": "CN3",
@@ -152,7 +176,9 @@ const char* jsonString = R"({
           "minValue": 0,
           "maxValue": 1,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         }
       },
       "totalChildren": 3
@@ -169,7 +195,9 @@ const char* jsonString = R"({
           "minValue": 1,
           "maxValue": 20,
           "accessAllowed": true,
-          "editAllowed": true
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         }
       },
       "totalChildren": 1
@@ -177,13 +205,11 @@ const char* jsonString = R"({
   }
 })";
 
-
 // Khai báo các nút
 /*const int btnMenu = 32;
 const int btnSet = 33;
 const int btnUp = 34;
 const int btnDown = 35;*/
-
 
 int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
 int btnSetPressMill = 1000;  // thời gian nhấn giữ phím
@@ -209,6 +235,7 @@ String setupCodeStr;
 String valueStr;
 String textStr;
 String keyStr;
+String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
 
 bool isNumeric(const char* str) {
   // Chuỗi rỗng không được coi là số
@@ -231,6 +258,24 @@ bool isNumeric(const char* str) {
   return true; // Nếu tất cả ký tự là số
 }
 
+void splitString(const String& input, String* output, int maxParts) {
+  int partCount = 0; // Đếm số phần đã tách
+  int startIndex = 0; // Vị trí bắt đầu
+
+  while (partCount < maxParts) {
+    int commaIndex = input.indexOf(',', startIndex); // Tìm dấu phẩy
+
+    // Nếu không tìm thấy dấu phẩy, lấy phần còn lại
+    if (commaIndex == -1) {
+      output[partCount++] = input.substring(startIndex);
+      break; // Thoát khỏi vòng lặp
+    }
+
+    // Lấy phần từ startIndex đến dấu phẩy
+    output[partCount++] = input.substring(startIndex, commaIndex);
+    startIndex = commaIndex + 1; // Cập nhật vị trí bắt đầu
+  }
+}
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
   int16_t cursorX = x;  // Vị trí x bắt đầu in
@@ -299,8 +344,7 @@ void showList(int indexNum){
 
 void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  //u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
-  u8g2.setFont (u8g2_font_unifont_t_vietnamese2); // sử dụng tiếng Trung2 cho tất cả các glyphs của ""
+  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
 
   char tempSetUpCode[64];    // Tạo một chuỗi tạm chứa mã cài đặt và dấu ";"
   snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setUpCode);  // Nối mã cài đặt với dấu ":"
@@ -404,8 +448,17 @@ void loadJsonSettings() {
 
         maxValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["maxValue"];
         minValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["minValue"];
+        bool explanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationMode"];
+        if (explanationMode){
+          String listStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationDetails"];
+          
+          splitString(listStr, ListExp, 10);
+          textStr = ListExp[currentValue];
+        } else {
+          textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
+        }
+        log(textStr);
 
-        textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
         keyStr = String(code);
         log("Truy cập thẻ " + keyStr + "/" + setupCodeStr);
         showSetup(setupCodeStr.c_str(), valueStr.c_str() , textStr.c_str()); // Hiển thị thông tin cấu hình bằng cách gọi hàm showSetup
@@ -433,7 +486,6 @@ void reSet(){
           Serial.println("Failed to create file");
           return;
       }
-      
       // Ghi nội dung vào tệp
       file.print(jsonString);
       file.close();
@@ -590,14 +642,12 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
-
 void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
 
   u8g2.begin();  // Khởi tạo màn hình OLED
-  u8g2.enableUTF8Print (); // kích hoạt hỗ trợ UTF8 cho chức năng Arduino print () 
-  
+
   btnMenu.attachClick(btnMenuClick);
   btnMenu.attachLongPressStart(btnMenuLongPressStart);
   btnMenu.attachDuringLongPress(btnMenuDuringLongPress);

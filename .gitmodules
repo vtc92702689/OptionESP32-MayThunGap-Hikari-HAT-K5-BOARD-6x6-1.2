@@ -1,0 +1,3 @@
+[submodule "MainEsp32"]
+	path = MainEsp32
+	url = https://github.com/vtc92702689/MainEsp32.git
