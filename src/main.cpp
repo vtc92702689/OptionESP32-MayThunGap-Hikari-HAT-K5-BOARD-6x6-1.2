@@ -1,7 +1,5 @@
 #include <Arduino.h>
-#include <Wire.h>
 #include <U8g2lib.h>
-#include <Preferences.h>
 #include <ArduinoJson.h>
 #include <OneButton.h>
 #include <LittleFS.h>
@@ -206,10 +204,15 @@ const char* jsonString = R"({
 })";
 
 // Khai báo các nút
-/*const int btnMenu = 32;
-const int btnSet = 33;
-const int btnUp = 34;
-const int btnDown = 35;*/
+
+const int sensorCount = 17;
+const int sensorFabric = 16;
+const int outRelayCut = 25;
+const int outRelayAir = 26;
+
+
+// thêm để commit
+
 
 int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
 int btnSetPressMill = 1000;  // thời gian nhấn giữ phím
@@ -222,14 +225,19 @@ int maxLength = 0; //Số kí tự hiển thị trên func showSetup
 int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 = chục, ...)
 int currentValue;
 
-OneButton btnMenu(32, false,false); 
-OneButton btnSet(33, false,false);
-OneButton btnUp(34, false,false);
-OneButton btnDown(35, false,false);
+OneButton btnMenu(34, false,false);
+OneButton btnSet(35, false,false);
+OneButton btnUp(36, false,false);
+OneButton btnDown(39, false,false);
+OneButton btnRun(32,false,false);
+OneButton btnEstop(33,false,false);
+
+bool explanationMode; //logic chức năng diễn giải
 
 const char* menu1;
 const char* menu2;
 const char* menu3;
+
 String displayScreen = "MENU";
 String setupCodeStr;
 String valueStr;
@@ -275,6 +283,27 @@ void splitString(const String& input, String* output, int maxParts) {
     output[partCount++] = input.substring(startIndex, commaIndex);
     startIndex = commaIndex + 1; // Cập nhật vị trí bắt đầu
   }
+}
+
+bool WaitMillis(unsigned long thoiDiemCuoi, unsigned long waitTime) {
+  return (millis() - thoiDiemCuoi > waitTime);
+}
+
+bool WaitMicros(unsigned long thoiDiemCuoi, unsigned long waitTime) {
+  return (micros() - thoiDiemCuoi > waitTime);
+}
+
+void drawCenteredText(const char* text, int y) {
+  int screenWidth = u8g2.getDisplayWidth();
+  
+  // Đo độ rộng của chuỗi
+  int textWidth = u8g2.getStrWidth(text);
+  
+  // Tính toán vị trí x để căn giữa
+  int x = (screenWidth - textWidth) / 2;
+
+  u8g2.setFont(u8g2_font_ncenB14_tr); // Chọn font chữ
+  u8g2.drawStr(x, y, text);           // Vẽ chuỗi căn giữa
 }
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
@@ -339,6 +368,17 @@ void showList(int indexNum){
   u8g2.drawStr(12, 48, menu3);  // Hiển thị danh mục 3
 
   u8g2.drawStr(0, indexNum * 16, ">");  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
+  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
+}
+
+void showText(const char* title, const char* messenger){
+  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
+  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
+
+  drawCenteredText(title,18);
+  
+  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
+  wrapText(messenger, 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
@@ -448,16 +488,16 @@ void loadJsonSettings() {
 
         maxValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["maxValue"];
         minValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["minValue"];
-        bool explanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationMode"];
+        explanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationMode"];
         if (explanationMode){
           String listStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationDetails"];
           
           splitString(listStr, ListExp, 10);
-          textStr = ListExp[currentValue];
+          textStr = ListExp[currentValue-1];
         } else {
           textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
         }
-        log(textStr);
+        //log(textStr);
 
         keyStr = String(code);
         log("Truy cập thẻ " + keyStr + "/" + setupCodeStr);
@@ -511,6 +551,11 @@ void editValue(const char* Calculations) {
 
     // Chuyển giá trị thành chuỗi để hiển thị
     valueStr = String(currentValue);
+
+    // Kiểm tra chức năng diễn giải có hoạt động hay không, nếu hoạt động thì hiển thị diễn giải
+    if (explanationMode){
+      textStr = ListExp[currentValue-1];
+    }
 
     // Gọi lại hàm showEdit để cập nhật màn hình
     showEdit(columnIndex);
@@ -570,6 +615,7 @@ void btnSetLongPressStart() {
     } else if (keyStr == "CN"){
       if (setupCodeStr == "CN3" && currentValue == 1){
         reSet();
+        showText("RESET","Tat May Khoi Dong Lai!");
       }
     }
   }
@@ -641,6 +687,7 @@ void btnDownLongPressStart() {
 void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
+
 
 void setup() {
 
@@ -744,3 +791,4 @@ void loop() {
   btnUp.tick();
   btnDown.tick(); 
 }
+
