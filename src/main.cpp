@@ -241,6 +241,7 @@ const char* menu3;
 String displayScreen = "MENU";
 String setupCodeStr;
 String valueStr;
+String textExplanationMode;
 String textStr;
 String keyStr;
 String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
@@ -493,7 +494,8 @@ void loadJsonSettings() {
           String listStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationDetails"];
           
           splitString(listStr, ListExp, 10);
-          textStr = ListExp[currentValue-1];
+          textExplanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>();
+          textStr = textExplanationMode +": " + ListExp[currentValue-1];  // Hiển thị text từ list
         } else {
           textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
         }
@@ -554,7 +556,7 @@ void editValue(const char* Calculations) {
 
     // Kiểm tra chức năng diễn giải có hoạt động hay không, nếu hoạt động thì hiển thị diễn giải
     if (explanationMode){
-      textStr = ListExp[currentValue-1];
+      textStr = textExplanationMode + ": " +ListExp[currentValue-1];
     }
 
     // Gọi lại hàm showEdit để cập nhật màn hình
