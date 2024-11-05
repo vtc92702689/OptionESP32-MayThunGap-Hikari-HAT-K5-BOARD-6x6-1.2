@@ -705,8 +705,26 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
-void mainRun(){
 
+
+void mainRun(){
+  switch (mainStep){
+  case 0:
+    /* code */
+    break;
+  
+  case 1:
+
+    break;
+  case 0:
+    /* code */
+    break;
+  case 0:
+    /* code */
+    break;
+  default:
+    break;
+  }
 }
 
 void setup() {
