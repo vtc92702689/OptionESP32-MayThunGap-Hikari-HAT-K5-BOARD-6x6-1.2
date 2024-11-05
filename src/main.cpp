@@ -225,6 +225,9 @@ int maxLength = 0; //Số kí tự hiển thị trên func showSetup
 int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 = chục, ...)
 int currentValue;
 
+byte trangThaiHoatDong = 0;
+byte mainStep = 0;
+
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
 OneButton btnUp(36, false,false);
@@ -574,6 +577,18 @@ void btnMenuClick() {
   } else if (displayScreen == "ScreenEdit") {
     loadJsonSettings();
     displayScreen = "ScreenCD";
+  } else if (displayScreen == "khoiDong" && mainStep == 0) {
+    trangThaiHoatDong = 0;
+    showList(menuIndex);  // Hiển thị danh sách menu hiện tại
+    displayScreen = "MENU";
+  } else if (displayScreen == "MENU" && mainStep == 0){
+    displayScreen= "hoatDong";
+    trangThaiHoatDong = 1;
+    showText("Hoat Dong", "Dang Hoat Dong");
+  } else if (displayScreen == "hoatDong" && mainStep == 0) {
+    trangThaiHoatDong = 0;
+    showList(menuIndex);  // Hiển thị danh sách menu hiện tại
+    displayScreen = "MENU";
   }
 }
 
@@ -690,6 +705,9 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+void mainRun(){
+
+}
 
 void setup() {
 
@@ -788,9 +806,23 @@ void setup() {
 }
 
 void loop() {
-  btnMenu.tick();
-  btnSet.tick();
-  btnUp.tick();
-  btnDown.tick(); 
-}
+  switch (trangThaiHoatDong){
+  case 0:
+    btnMenu.tick();
+    btnSet.tick();
+    btnUp.tick();
+    btnDown.tick();
+    break;
+  case 1:
+    btnMenu.tick();
+    
+    
+    break;
+  case 2:
 
+    break;
+  default:
+    break;
+  }
+  
+}
