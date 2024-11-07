@@ -205,13 +205,6 @@ const char* jsonString = R"({
 
 // Khai báo các nút
 
-const int sensorCount = 17;
-const int sensorFabric = 16;
-const int outRelayCut = 25;
-const int outRelayAir = 26;
-
-
-// thêm để commit
 
 
 int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
@@ -241,7 +234,7 @@ const char* menu1;
 const char* menu2;
 const char* menu3;
 
-String displayScreen = "MENU";
+String displayScreen = "khoiDong";
 String setupCodeStr;
 String valueStr;
 String textExplanationMode;
@@ -384,6 +377,25 @@ void showText(const char* title, const char* messenger){
   u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
   wrapText(messenger, 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
+}
+
+void showProgress(int parameter1, int parameter2, int parameter3) {
+  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
+  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
+
+  // Hiển thị thông số Total Stick
+  u8g2.drawStr(0, 18, "Total Stick: ");
+  u8g2.drawStr(100, 18, String(parameter1).c_str());  // Chuyển parameter1 thành chuỗi và hiển thị
+
+  // Hiển thị thông số Re.Stick
+  u8g2.drawStr(0, 36, "Re.Stick: ");
+  u8g2.drawStr(100, 36, String(parameter2).c_str());  // Chuyển parameter2 thành chuỗi và hiển thị
+
+  // Hiển thị thông số Count output
+  u8g2.drawStr(0, 54, "Count output: ");
+  u8g2.drawStr(100, 54, String(parameter3).c_str());  // Chuyển parameter3 thành chuỗi và hiển thị
+
+  u8g2.sendBuffer();  // Gửi dữ liệu từ bộ đệm lên màn hình
 }
 
 void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
@@ -705,7 +717,16 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+void tinhToanCaiDat(){
 
+}
+
+void loadSetup(){
+
+
+  trangThaiHoatDong = 1;
+  tinhToanCaiDat();
+}
 
 void mainRun(){
   switch (mainStep){
@@ -716,10 +737,7 @@ void mainRun(){
   case 1:
 
     break;
-  case 0:
-    /* code */
-    break;
-  case 0:
+  case 2:
     /* code */
     break;
   default:
@@ -773,6 +791,8 @@ void setup() {
     return;
   }
 
+  loadSetup();
+
   const char* filePath = "/config.json";
 
   // Kiểm tra tệp có thể đọc được không
@@ -803,7 +823,7 @@ void setup() {
       }
   }
 
-  const size_t capacity = 1024;  // Kích thước buffer, có thể thay đổi theo dung lượng file
+  const size_t capacity = 4000;  // Kích thước buffer, có thể thay đổi theo dung lượng file
   char content[capacity];        // Mảng chứa nội dung file
 
   if (file) {
@@ -837,7 +857,7 @@ void loop() {
     
     break;
   case 2:
-
+    mainRun();
     break;
   default:
     break;
