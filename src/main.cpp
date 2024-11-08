@@ -11,203 +11,9 @@ U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // 
 
 StaticJsonDocument<200> jsonDoc;
 
-const char* jsonString = R"({
-  "main": {
-    "main1": {
-      "text": "CAI DAT",
-      "key": "CD",
-      "children": {
-        "CD1": {
-          "key": "CD1",
-          "text": "Text1",
-          "defaultValue": 1,
-          "configuredValue": 1,
-          "minValue": 1,
-          "maxValue": 3,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": true,
-          "explanationDetails": "Mode1,Mode2,Mode3"
-        },
-        "CD2": {
-          "key": "CD2",
-          "text": "Text2",
-          "defaultValue": 100,
-          "configuredValue": 100,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD3": {
-          "key": "CD3",
-          "text": "Text3",
-          "defaultValue": 200,
-          "configuredValue": 200,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD4": {
-          "key": "CD4",
-          "text": "Text4",
-          "defaultValue": 300,
-          "configuredValue": 300,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD5": {
-          "key": "CD5",
-          "text": "Text5",
-          "defaultValue": 400,
-          "configuredValue": 400,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD6": {
-          "key": "CD6",
-          "text": "Text6",
-          "defaultValue": 500,
-          "configuredValue": 500,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD7": {
-          "key": "CD7",
-          "text": "Text7",
-          "defaultValue": 600,
-          "configuredValue": 600,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD8": {
-          "key": "CD8",
-          "text": "Text8",
-          "defaultValue": 700,
-          "configuredValue": 700,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD9": {
-          "key": "CD9",
-          "text": "Text9",
-          "defaultValue": 800,
-          "configuredValue": 800,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD10": {
-          "key": "CD10",
-          "text": "Text10",
-          "defaultValue": 900,
-          "configuredValue": 900,
-          "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        }
-      },
-      "totalChildren": 10
-    },
-    "main2": {
-      "text": "CHUC NANG",
-      "key": "CN",
-      "children": {
-        "CN1": {
-          "key": "CN1",
-          "text": "TEST MODE",
-          "defaultValue": 1,
-          "configuredValue": 1,
-          "minValue": 1,
-          "maxValue": 20,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CN2": {
-          "key": "CN2",
-          "text": "TEST IO",
-          "defaultValue": 1,
-          "configuredValue": 1,
-          "minValue": 1,
-          "maxValue": 20,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CN3": {
-          "key": "CN3",
-          "text": "RESET",
-          "defaultValue": 0,
-          "configuredValue": 0,
-          "minValue": 0,
-          "maxValue": 1,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        }
-      },
-      "totalChildren": 3
-    },
-    "main3": {
-      "text": "GIOI THIEU",
-      "key": "GT",
-      "children": {
-        "GT1": {
-          "key": "GT1",
-          "text": "DKien Design",
-          "defaultValue": 1,
-          "configuredValue": 1,
-          "minValue": 1,
-          "maxValue": 20,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        }
-      },
-      "totalChildren": 1
-    }
-  }
-})";
+const char* jsonString = R"()";
 
 // Khai báo các nút
-
-
 
 int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
 int btnSetPressMill = 1000;  // thời gian nhấn giữ phím
@@ -221,6 +27,7 @@ int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 =
 int currentValue;
 
 byte trangThaiHoatDong = 0;
+byte testModeStep = 0;
 byte mainStep = 0;
 
 OneButton btnMenu(34, false,false);
@@ -231,12 +38,14 @@ OneButton btnRun(32,false,false);
 OneButton btnEstop(33,false,false);
 
 bool explanationMode; //logic chức năng diễn giải
+bool editAllowed; //logic chức năng chỉnh sửa
 
 const char* menu1;
 const char* menu2;
 const char* menu3;
+const char* configFile = "/config.json";
 
-String displayScreen = "khoiDong";
+String displayScreen = "index";
 String setupCodeStr;
 String valueStr;
 String textExplanationMode;
@@ -244,18 +53,15 @@ String textStr;
 String keyStr;
 String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
 
-void readConfigFile();
+void reSet();
 
 void drawCenteredText(const char* text, int y) {
   int screenWidth = u8g2.getDisplayWidth();
   
   // Đo độ rộng của chuỗi
   int textWidth = u8g2.getStrWidth(text);
-  
   // Tính toán vị trí x để căn giữa
   int x = (screenWidth - textWidth) / 2;
-
-  u8g2.setFont(u8g2_font_ncenB14_tr); // Chọn font chữ
   u8g2.drawStr(x, y, text);           // Vẽ chuỗi căn giữa
 }
 
@@ -461,6 +267,7 @@ void loadJsonSettings() {
         maxValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["maxValue"];
         minValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["minValue"];
         explanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationMode"];
+        editAllowed = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["editAllowed"];
         if (explanationMode){
           String listStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationDetails"];
           
@@ -483,28 +290,6 @@ void loadJsonSettings() {
     }
 }
 
-void reSet(){
-   const char* filePath = "/config.json";
-
-  // Kiểm tra tệp có thể đọc được không
-  File file = LittleFS.open(filePath, "r");
-  if (!file) {
-      // Nếu không đọc được tệp, ghi jsonString vào tệp
-      Serial.println("File not found, creating a new one...");
-
-      // Mở tệp để ghi
-      file = LittleFS.open(filePath, "w");
-      if (!file) {
-          showSetup("Error", "E001", "LittleFS Error");
-          Serial.println("Failed to create file");
-          return;
-      }
-      // Ghi nội dung vào tệp
-      file.print(jsonString);
-      file.close();
-      Serial.println("File written successfully!");
-  };
-}
 
 void editValue(const char* Calculations) {
     int newValue;
@@ -534,6 +319,24 @@ void editValue(const char* Calculations) {
     showEdit(columnIndex);
 }
 
+void readConfigFile() {
+  // Đọc nội dung file config.json
+  File config = LittleFS.open(configFile, "r");  // Mở file ở chế độ đọc
+  if (!config) {
+    Serial.println("Failed to open config file");
+    return;
+  }
+
+  // Đọc dữ liệu từ file
+  DeserializationError error = deserializeJson(jsonDoc, config);
+  if (error) {
+    Serial.println("Failed to read config file");
+    return;
+  }
+  config.close();
+}
+
+
 void btnMenuClick() {
   //Serial.println("Button Clicked (nhấn nhả)");
   if (displayScreen == "ScreenCD") {
@@ -545,19 +348,20 @@ void btnMenuClick() {
   } else if (displayScreen == "ScreenEdit") {
     loadJsonSettings();
     displayScreen = "ScreenCD";
-  } else if (displayScreen == "khoiDong" && mainStep == 0) {
+  } else if (displayScreen == "index" && mainStep == 0) {
     trangThaiHoatDong = 0;
     showList(menuIndex);  // Hiển thị danh sách menu hiện tại
     displayScreen = "MENU";
   } else if (displayScreen == "MENU" && mainStep == 0){
-    displayScreen= "hoatDong";
+    displayScreen= "index";
     trangThaiHoatDong = 1;
-    showText("Hoat Dong", "Dang Hoat Dong");
-  } else if (displayScreen == "hoatDong" && mainStep == 0) {
+    showText("HELLO", "ESP32-OPTION");
+  } else if (displayScreen == "testIO"){
+    loadJsonSettings();
+    displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
-    showList(menuIndex);  // Hiển thị danh sách menu hiện tại
-    displayScreen = "MENU";
   }
+  
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -575,17 +379,39 @@ void btnSetClick() {
     pIndex = 1;
     loadJsonSettings(); // Hiển thị giá trị thiết lập
     displayScreen = "ScreenCD"; // Chuyển màn hình sau khi xử lý dữ liệu thành công
-  } else if (displayScreen == "ScreenCD"){
-    columnIndex = maxLength-1;
-    showEdit(columnIndex);
-    displayScreen = "ScreenEdit";
-  } else if (displayScreen == "ScreenEdit")  {
-    if (columnIndex - 1 < 0){
+  } else if (displayScreen == "ScreenCD" && editAllowed){
+    if (keyStr == "CD"){
       columnIndex = maxLength-1;
-    } else {
-      columnIndex --;
+      showEdit(columnIndex);
+      displayScreen = "ScreenEdit";
     }
-    showEdit(columnIndex);
+    else if (keyStr == "CN"){
+      if (setupCodeStr == "CN1"){
+        trangThaiHoatDong = 201;   //Trạng thái hoạt động 201 là trạng thái TestMode
+        columnIndex = 0;
+        showEdit(columnIndex);
+        displayScreen = "ScreenEdit";
+      } else if (setupCodeStr == "CN2"){
+        trangThaiHoatDong = 202;   //Trạng thái hoạt động 202 là trạng thái TEST IO INPUT
+        showText("TEST I/O", "TEST I/O INPUT");
+        displayScreen = "testIO";
+      } else if ((setupCodeStr == "CN3")){
+        trangThaiHoatDong = 203;  //Trạng thái hoạt động 203 là trạng thái TEST IO OUTPUT
+        columnIndex = 0;
+        showEdit(columnIndex);
+        displayScreen = "ScreenEdit";
+      }
+    }
+
+  } else if (displayScreen == "ScreenEdit")  {
+    if (keyStr == "CD"){
+      if (columnIndex - 1 < 0){
+        columnIndex = maxLength-1;
+      } else {
+        columnIndex --;
+      }
+      showEdit(columnIndex);
+    }
   }
 }
 
@@ -598,9 +424,13 @@ void btnSetLongPressStart() {
       loadJsonSettings();
       displayScreen = "ScreenCD";
     } else if (keyStr == "CN"){
-      if (setupCodeStr == "CN3" && currentValue == 1){
+      if (setupCodeStr == "CN2"){
+        /* code */
+      } else if (setupCodeStr == "CN4" && currentValue == 1){
         reSet();
         showText("RESET","Tat May Khoi Dong Lai!");
+        trangThaiHoatDong = 200;  //Trạng thái hoạt động 200 là reset, không cho phép thao tác nào
+        displayScreen = "RESET";
       }
     }
   }
@@ -627,8 +457,13 @@ void btnUpClick() {
     }
     loadJsonSettings(); // Hiển thị giá trị thiết lập
   } else if (displayScreen == "ScreenEdit") {
-    editValue("addition");
-    log("Value:" + valueStr);
+    if (keyStr = "CD"){
+      editValue("addition");
+      log("Value:" + valueStr);
+    } else if (keyStr == "CN") {
+      editValue("addition");
+      log("Value:" + valueStr);
+    }
   }
 }
 
@@ -658,8 +493,13 @@ void btnDownClick() {
     }
     loadJsonSettings(); // Hiển thị giá trị thiết lập
   } else if (displayScreen == "ScreenEdit"){
-    editValue("subtraction");
-    log("Value:" + valueStr);
+    if (keyStr == "CD"){
+      editValue("subtraction");
+      log("Value:" + valueStr);
+    } else if (keyStr == "CN"){
+      editValue("subtraction");
+      log("Value:" + valueStr);
+    }
   }
 }
 
@@ -673,15 +513,80 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+//KHAI BÁO CHÂN IO Ở ĐÂY
+
+const int sensorCilinderXp1 = 17;
+const int sensorCilinderXp2 = 16;
+
+const int sensorCilinderYp1 = 4;
+const int sensorCilinderYp2 = 0;
+
+const int sensorOrigin = 2;
+const int sensorFoot = 15;
+const int sensorActive = 23;
+
+const int outRelayX = 25;
+const int outRelayY = 26;
+const int outRelayFoot = 27;
+const int outRelayRun = 14;
+
+const int pinDir = 1;
+const int pinPWM = 3;
+
+
+//TRƯƠNG TRÌNH NGƯỜI DÙNG LẬP TRÌNH
+
 void tinhToanCaiDat(){
 
+}
+void reSet(){
+   
 }
 
 void loadSetup(){
 
-
-  trangThaiHoatDong = 1;
   tinhToanCaiDat();
+  trangThaiHoatDong = 1;
+}
+
+void khoiDong(){
+  displayScreen = "index";
+  showText("HELLO","ESP32-OPTION");
+  mainStep = 0;
+  trangThaiHoatDong = 0;
+  loadSetup();
+}
+void testMode(){
+  static bool trangthaiCuoiIO1;
+  if (digitalRead(sensorCilinderXp1)!= trangthaiCuoiIO1){
+    trangthaiCuoiIO1 = digitalRead(sensorCilinderXp1);
+    showText("IO 17" , String(trangthaiCuoiIO1).c_str());
+  }
+  static bool trangthaiCuoiIO2;
+  if (digitalRead(sensorCilinderXp2)!= trangthaiCuoiIO2){
+    trangthaiCuoiIO2 = digitalRead(sensorCilinderXp2);
+    showText("IO 16" , String(trangthaiCuoiIO2).c_str());
+  }
+  static bool trangthaiCuoiIO3;
+  if (digitalRead(sensorCilinderYp1)!= trangthaiCuoiIO3){
+    trangthaiCuoiIO3 = digitalRead(sensorCilinderYp1);
+    showText("IO 04" , String(trangthaiCuoiIO3).c_str());
+  }
+  static bool trangthaiCuoiIO4;
+  if (digitalRead(sensorCilinderYp2)!= trangthaiCuoiIO4){
+    trangthaiCuoiIO4 = digitalRead(sensorCilinderYp2);
+    showText("IO 00" , String(trangthaiCuoiIO4).c_str());
+  }
+  static bool trangthaiCuoiIO5;
+  if (digitalRead(sensorOrigin)!= trangthaiCuoiIO5){
+    trangthaiCuoiIO5 = digitalRead(sensorOrigin);
+    showText("IO 02" , String(trangthaiCuoiIO5).c_str());
+  }
+  static bool trangthaiCuoiIO6;
+  if (digitalRead(sensorFoot)!= trangthaiCuoiIO6){
+    trangthaiCuoiIO6 = digitalRead(sensorFoot);
+    showText("IO 15" , String(trangthaiCuoiIO6).c_str());
+  }
 }
 
 void mainRun(){
@@ -702,7 +607,7 @@ void mainRun(){
 }
 
 
-const char* configFile = "/config.json";
+
 void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
@@ -735,6 +640,22 @@ void setup() {
   btnUp.setPressMs(btnSetPressMill);
   btnDown.setPressMs(btnSetPressMill);
 
+  pinMode(sensorCilinderXp1,INPUT);
+  pinMode(sensorCilinderXp2,INPUT);
+  pinMode(sensorCilinderYp1,INPUT);
+  pinMode(sensorCilinderYp2,INPUT);
+  pinMode(sensorActive,INPUT);
+  pinMode(sensorFoot,INPUT);
+  pinMode(sensorOrigin,INPUT);
+
+  pinMode(pinDir,OUTPUT);
+  pinMode(pinPWM,OUTPUT);
+  pinMode(outRelayX,OUTPUT);
+  pinMode(outRelayY,OUTPUT);
+  pinMode(outRelayFoot,OUTPUT);
+  pinMode(outRelayRun,OUTPUT);
+
+
   if (!LittleFS.begin()) {
     showSetup("Error", "E003", "LittleFS Mount Failed");
     Serial.println("LittleFS Mount Failed");
@@ -762,23 +683,7 @@ void setup() {
   readConfigFile();
 
   Serial.println("Load toàn bộ dữ liệu thành công");
-
-}
-void readConfigFile() {
-  // Đọc nội dung file config.json
-  File config = LittleFS.open(configFile, "r");  // Mở file ở chế độ đọc
-  if (!config) {
-    Serial.println("Failed to open config file");
-    return;
-  }
-
-  // Đọc dữ liệu từ file
-  DeserializationError error = deserializeJson(jsonDoc, config);
-  if (error) {
-    Serial.println("Failed to read config file");
-    return;
-  }
-  config.close();
+  khoiDong();
 }
 
 void loop() {
@@ -796,6 +701,16 @@ void loop() {
     break;
   case 2:
     mainRun();
+    break;
+  case 200:
+    break;
+  case 201:
+    break;
+  case 202:
+    btnMenu.tick();
+    testMode();
+    break;
+  case 203:
     break;
   default:
     break;
