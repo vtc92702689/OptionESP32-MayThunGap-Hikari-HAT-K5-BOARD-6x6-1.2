@@ -3,8 +3,10 @@
 #include <ArduinoJson.h>
 #include <OneButton.h>
 #include <LittleFS.h>
+#include "func.h"  // Bao gồm file header func.h để sử dụng các hàm từ func.cpp
 
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
+//U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
+U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
 
 
 StaticJsonDocument<200> jsonDoc;
@@ -242,53 +244,7 @@ String textStr;
 String keyStr;
 String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
 
-bool isNumeric(const char* str) {
-  // Chuỗi rỗng không được coi là số
-  if (str == nullptr || str[0] == '\0') return false;
-
-  // Nếu ký tự đầu là dấu trừ, bắt đầu kiểm tra từ ký tự thứ 2
-  int startIndex = 0;
-  if (str[0] == '-') {
-    if (str[1] == '\0') return false; // "-"" không phải là số
-    startIndex = 1; // Bỏ qua dấu trừ
-  }
-
-  // Kiểm tra từng ký tự có phải là số không
-  for (int i = startIndex; str[i] != '\0'; i++) {
-    if (!isDigit(str[i])) {
-      return false; // Nếu có ký tự không phải là số
-    }
-  }
-
-  return true; // Nếu tất cả ký tự là số
-}
-
-void splitString(const String& input, String* output, int maxParts) {
-  int partCount = 0; // Đếm số phần đã tách
-  int startIndex = 0; // Vị trí bắt đầu
-
-  while (partCount < maxParts) {
-    int commaIndex = input.indexOf(',', startIndex); // Tìm dấu phẩy
-
-    // Nếu không tìm thấy dấu phẩy, lấy phần còn lại
-    if (commaIndex == -1) {
-      output[partCount++] = input.substring(startIndex);
-      break; // Thoát khỏi vòng lặp
-    }
-
-    // Lấy phần từ startIndex đến dấu phẩy
-    output[partCount++] = input.substring(startIndex, commaIndex);
-    startIndex = commaIndex + 1; // Cập nhật vị trí bắt đầu
-  }
-}
-
-bool WaitMillis(unsigned long thoiDiemCuoi, unsigned long waitTime) {
-  return (millis() - thoiDiemCuoi > waitTime);
-}
-
-bool WaitMicros(unsigned long thoiDiemCuoi, unsigned long waitTime) {
-  return (micros() - thoiDiemCuoi > waitTime);
-}
+void readConfigFile();
 
 void drawCenteredText(const char* text, int y) {
   int screenWidth = u8g2.getDisplayWidth();
@@ -745,6 +701,8 @@ void mainRun(){
   }
 }
 
+
+const char* configFile = "/config.json";
 void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
@@ -780,67 +738,47 @@ void setup() {
   if (!LittleFS.begin()) {
     showSetup("Error", "E003", "LittleFS Mount Failed");
     Serial.println("LittleFS Mount Failed");
+    return;
+  }
+
+  
+
+  // Kiểm tra xem file config.json có tồn tại không
+  if (!LittleFS.exists(configFile)) {
     DeserializationError error = deserializeJson(jsonDoc, jsonString); // Phân tích chuỗi JSON
     if (error) {
-        showSetup("Error", "E002", "Json Error");
+        showSetup("Error", "E005", "JsonString Error");
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
         return;
     }
+    showSetup("Error", "E007", "JsonString Load Mode");
     Serial.println("Read Data From JsonString");
+    loadSetup();
+    Serial.println("File config.json does not exist.");
     return;
   }
 
-  loadSetup();
+  readConfigFile();
 
-  const char* filePath = "/config.json";
+  Serial.println("Load toàn bộ dữ liệu thành công");
 
-  // Kiểm tra tệp có thể đọc được không
-  File file = LittleFS.open(filePath, "r");
-  if (!file) {
-      // Nếu không đọc được tệp, ghi jsonString vào tệp
-      Serial.println("File not found, creating a new one...");
-
-      // Mở tệp để ghi
-      file = LittleFS.open(filePath, "w");
-      if (!file) {
-          showSetup("Error", "E001", "LittleFS Error");
-          Serial.println("Failed to create file");
-          return;
-      }
-      
-      // Ghi nội dung vào tệp
-      file.print(jsonString);
-      file.close();
-      Serial.println("File written successfully!");
-
-      // Mở lại file sau khi ghi thành công
-      file = LittleFS.open(filePath, "r");
-      if (!file) {
-          showSetup("Error", "E004", "Failed to Re-open File");
-          Serial.println("Failed to re-open file");
-          return;
-      }
+}
+void readConfigFile() {
+  // Đọc nội dung file config.json
+  File config = LittleFS.open(configFile, "r");  // Mở file ở chế độ đọc
+  if (!config) {
+    Serial.println("Failed to open config file");
+    return;
   }
 
-  const size_t capacity = 4000;  // Kích thước buffer, có thể thay đổi theo dung lượng file
-  char content[capacity];        // Mảng chứa nội dung file
-
-  if (file) {
-    size_t len = file.readBytes(content, capacity); // Đọc nội dung file vào buffer
-    content[len] = '\0';  // Đảm bảo buffer kết thúc bằng null terminator
-  }
-  file.close(); // Đóng file
-
-  // Sử dụng ArduinoJson để phân tích cú pháp JSON
-  DeserializationError error = deserializeJson(jsonDoc, content); // Phân tích chuỗi JSON
+  // Đọc dữ liệu từ file
+  DeserializationError error = deserializeJson(jsonDoc, config);
   if (error) {
-      showSetup("Error", "E002", "Json Error");
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.f_str());
-      return;
+    Serial.println("Failed to read config file");
+    return;
   }
-  // Nếu mọi thứ thành công, tiếp tục với quá trình cài đặt của bạn
+  config.close();
 }
 
 void loop() {
@@ -862,5 +800,4 @@ void loop() {
   default:
     break;
   }
-  
 }
