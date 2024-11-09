@@ -547,6 +547,10 @@ const int outRelayRun = 14;
 const int pinDir = 1;
 const int pinPWM = 3;
 
+//KHAI BÁO THÔNG SỐ TRƯƠNG TRÌNH
+
+
+
 
 //TRƯƠNG TRÌNH NGƯỜI DÙNG LẬP TRÌNH
 
