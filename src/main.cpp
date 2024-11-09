@@ -29,6 +29,7 @@ int currentValue;
 byte trangThaiHoatDong = 0;
 byte testModeStep = 0;
 byte mainStep = 0;
+byte testOutputStep = 0;
 
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
@@ -39,6 +40,9 @@ OneButton btnEstop(33,false,false);
 
 bool explanationMode; //logic chức năng diễn giải
 bool editAllowed; //logic chức năng chỉnh sửa
+bool hienThiTestOutput = false;
+bool daoTinHieuOutput = false;
+
 
 const char* menu1;
 const char* menu2;
@@ -360,6 +364,10 @@ void btnMenuClick() {
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
+  } else if (displayScreen == "testOutput"){
+    loadJsonSettings();
+    displayScreen = "ScreenCD";
+    trangThaiHoatDong = 0;
   }
   
 }
@@ -384,8 +392,7 @@ void btnSetClick() {
       columnIndex = maxLength-1;
       showEdit(columnIndex);
       displayScreen = "ScreenEdit";
-    }
-    else if (keyStr == "CN"){
+    } else if (keyStr == "CN") {
       if (setupCodeStr == "CN1"){
         trangThaiHoatDong = 201;   //Trạng thái hoạt động 201 là trạng thái TestMode
         columnIndex = 0;
@@ -397,12 +404,11 @@ void btnSetClick() {
         displayScreen = "testIO";
       } else if ((setupCodeStr == "CN3")){
         trangThaiHoatDong = 203;  //Trạng thái hoạt động 203 là trạng thái TEST IO OUTPUT
-        columnIndex = 0;
-        showEdit(columnIndex);
-        displayScreen = "ScreenEdit";
+        testOutputStep = 0;
+        displayScreen = "testOutput";
+        hienThiTestOutput = true;
       }
     }
-
   } else if (displayScreen == "ScreenEdit")  {
     if (keyStr == "CD"){
       if (columnIndex - 1 < 0){
@@ -412,6 +418,8 @@ void btnSetClick() {
       }
       showEdit(columnIndex);
     }
+  } else if (displayScreen == "testOutput"){
+    daoTinHieuOutput = true;
   }
 }
 
@@ -464,6 +472,9 @@ void btnUpClick() {
       editValue("addition");
       log("Value:" + valueStr);
     }
+  } else if (displayScreen == "testOutput"){
+    testOutputStep ++;
+    hienThiTestOutput = true;
   }
 }
 
@@ -500,6 +511,9 @@ void btnDownClick() {
       editValue("subtraction");
       log("Value:" + valueStr);
     }
+  } else if (displayScreen == "testOutput"){
+    testOutputStep --;
+    hienThiTestOutput = true;
   }
 }
 
@@ -536,27 +550,9 @@ const int pinPWM = 3;
 
 //TRƯƠNG TRÌNH NGƯỜI DÙNG LẬP TRÌNH
 
-void tinhToanCaiDat(){
 
-}
-void reSet(){
-   
-}
 
-void loadSetup(){
-
-  tinhToanCaiDat();
-  trangThaiHoatDong = 1;
-}
-
-void khoiDong(){
-  displayScreen = "index";
-  showText("HELLO","ESP32-OPTION");
-  mainStep = 0;
-  trangThaiHoatDong = 0;
-  loadSetup();
-}
-void testMode(){
+void testInput(){
   static bool trangthaiCuoiIO1;
   if (digitalRead(sensorCilinderXp1)!= trangthaiCuoiIO1){
     trangthaiCuoiIO1 = digitalRead(sensorCilinderXp1);
@@ -587,6 +583,83 @@ void testMode(){
     trangthaiCuoiIO6 = digitalRead(sensorFoot);
     showText("IO 15" , String(trangthaiCuoiIO6).c_str());
   }
+}
+void testOutput(){
+  switch (testOutputStep){
+    case 0:
+      if (hienThiTestOutput){
+        bool tinHieuHienTai = digitalRead(outRelayX);
+        showText("IO 25", String(tinHieuHienTai).c_str());
+        hienThiTestOutput = false;
+      } else if (daoTinHieuOutput){
+        bool tinHieuHienTai = digitalRead(outRelayX);
+        digitalWrite(outRelayX,!tinHieuHienTai);
+        hienThiTestOutput = true;
+        daoTinHieuOutput = false;
+      }
+      break;
+    case 1:
+      if (hienThiTestOutput){
+        bool tinHieuHienTai = digitalRead(outRelayY);
+        showText("IO 26", String(tinHieuHienTai).c_str());
+        hienThiTestOutput = false;
+      } else if (daoTinHieuOutput){
+        bool tinHieuHienTai = digitalRead(outRelayY);
+        digitalWrite(outRelayY,!tinHieuHienTai);
+        hienThiTestOutput = true;
+        daoTinHieuOutput = false;
+      }
+      break;
+    case 2:
+      if (hienThiTestOutput){
+        bool tinHieuHienTai = digitalRead(outRelayFoot);
+        showText("IO 27", String(tinHieuHienTai).c_str());
+        hienThiTestOutput = false;
+      } else if (daoTinHieuOutput){
+        bool tinHieuHienTai = digitalRead(outRelayFoot);
+        digitalWrite(outRelayFoot,!tinHieuHienTai);
+        hienThiTestOutput = true;
+        daoTinHieuOutput = false;
+      }
+      break;
+    case 3:
+      if (hienThiTestOutput){
+        bool tinHieuHienTai = digitalRead(outRelayRun);
+        showText("IO 14", String(tinHieuHienTai).c_str());
+        hienThiTestOutput = false;
+      } else if (daoTinHieuOutput){
+        bool tinHieuHienTai = digitalRead(outRelayRun);
+        digitalWrite(outRelayRun,!tinHieuHienTai);
+        hienThiTestOutput = true;
+        daoTinHieuOutput = false;
+      }
+      break;
+    default:
+      testOutputStep = 3;
+      break;
+  }
+}
+
+
+void tinhToanCaiDat(){
+
+}
+void reSet(){
+   
+}
+
+void loadSetup(){
+
+  tinhToanCaiDat();
+  trangThaiHoatDong = 1;
+}
+
+void khoiDong(){
+  displayScreen = "index";
+  showText("HELLO","ESP32-OPTION");
+  mainStep = 0;
+  trangThaiHoatDong = 0;
+  loadSetup();
 }
 
 void mainRun(){
@@ -708,9 +781,14 @@ void loop() {
     break;
   case 202:
     btnMenu.tick();
-    testMode();
+    testInput();
     break;
   case 203:
+    btnMenu.tick();
+    btnSet.tick();
+    btnUp.tick();
+    btnDown.tick();
+    testOutput();
     break;
   default:
     break;
