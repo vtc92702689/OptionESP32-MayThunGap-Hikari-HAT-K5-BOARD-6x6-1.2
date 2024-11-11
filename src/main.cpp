@@ -27,9 +27,12 @@ int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 =
 int currentValue;
 
 byte trangThaiHoatDong = 0;
-byte testModeStep = 0;
 byte mainStep = 0;
-byte testOutputStep = 0;
+byte testModeStep = 0;
+byte maxTestModeStep = 0;
+
+int8_t testOutputStep = 0;
+int8_t maxTestOutputStep = 0;
 
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
@@ -42,6 +45,7 @@ bool explanationMode; //logic chức năng diễn giải
 bool editAllowed; //logic chức năng chỉnh sửa
 bool hienThiTestOutput = false;
 bool daoTinHieuOutput = false;
+bool chayTestMode = false;
 
 
 const char* menu1;
@@ -368,8 +372,11 @@ void btnMenuClick() {
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
+  } else if (displayScreen == "screenTestMode"){
+    loadJsonSettings();
+    displayScreen = "ScreenCD";
+    trangThaiHoatDong = 0;
   }
-  
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -395,9 +402,10 @@ void btnSetClick() {
     } else if (keyStr == "CN") {
       if (setupCodeStr == "CN1"){
         trangThaiHoatDong = 201;   //Trạng thái hoạt động 201 là trạng thái TestMode
-        columnIndex = 0;
-        showEdit(columnIndex);
-        displayScreen = "ScreenEdit";
+        testModeStep = 0;
+        chayTestMode = true;
+        showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
+        displayScreen = "screenTestMode";
       } else if (setupCodeStr == "CN2"){
         trangThaiHoatDong = 202;   //Trạng thái hoạt động 202 là trạng thái TEST IO INPUT
         showText("TEST I/O", "TEST I/O INPUT");
@@ -473,8 +481,19 @@ void btnUpClick() {
       log("Value:" + valueStr);
     }
   } else if (displayScreen == "testOutput"){
-    testOutputStep ++;
-    hienThiTestOutput = true;
+    if (testOutputStep == maxTestOutputStep){
+      testOutputStep = 0;
+      hienThiTestOutput = true;
+    } else {
+      testOutputStep ++;
+      hienThiTestOutput = true;
+    }
+  } else if (displayScreen == "screenTestMode"){
+    if (testModeStep < maxTestModeStep){
+      testModeStep ++;
+      chayTestMode = true;
+      showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
+    }
   }
 }
 
@@ -512,8 +531,19 @@ void btnDownClick() {
       log("Value:" + valueStr);
     }
   } else if (displayScreen == "testOutput"){
-    testOutputStep --;
-    hienThiTestOutput = true;
+    if (testOutputStep == 0){
+      testOutputStep = maxTestOutputStep;
+      hienThiTestOutput = true;
+    } else {
+      testOutputStep --;
+      hienThiTestOutput = true;
+    }
+  } else if (displayScreen == "screenTestMode"){
+    if (testModeStep > 0){
+      testModeStep --;
+      chayTestMode = true;
+      showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
+    }
   }
 }
 
@@ -555,6 +585,28 @@ const int pinPWM = 3;
 //TRƯƠNG TRÌNH NGƯỜI DÙNG LẬP TRÌNH
 
 
+void testMode(){
+  switch (testModeStep){
+  case 0:
+    if(chayTestMode){
+      maxTestModeStep = 2;
+      chayTestMode = false;
+    }
+    break;
+
+  case 1:
+    if (chayTestMode){
+      /* code */
+    }
+    break;
+  case 2:
+    /* code */
+    break;
+  default:
+    /* code */
+    break;
+  }
+}
 
 void testInput(){
   static bool trangthaiCuoiIO1;
@@ -592,6 +644,7 @@ void testOutput(){
   switch (testOutputStep){
     case 0:
       if (hienThiTestOutput){
+        maxTestOutputStep = 3;
         bool tinHieuHienTai = digitalRead(outRelayX);
         showText("IO 25", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
@@ -639,7 +692,6 @@ void testOutput(){
       }
       break;
     default:
-      testOutputStep = 3;
       break;
   }
 }
@@ -782,6 +834,10 @@ void loop() {
   case 200:
     break;
   case 201:
+    btnMenu.tick();
+    btnUp.tick();
+    btnDown.tick();
+    testMode();
     break;
   case 202:
     btnMenu.tick();
