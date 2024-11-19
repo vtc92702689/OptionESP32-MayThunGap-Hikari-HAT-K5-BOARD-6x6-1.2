@@ -31,8 +31,8 @@ byte mainStep = 0;
 byte testModeStep = 0;
 byte maxTestModeStep = 0;
 
-int8_t testOutputStep = 0;
-int8_t maxTestOutputStep = 0;
+byte testOutputStep = 0;
+byte maxTestOutputStep = 0;
 
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
@@ -344,6 +344,14 @@ void readConfigFile() {
   config.close();
 }
 
+void reSet(){
+  int totalPrmReSet = jsonDoc["main"]["main1"]["totalChildren"]; // Truy xuất tổng số lượng phần tử con mảng CD
+  for (size_t i = 0; i < totalPrmReSet; i++){
+    jsonDoc["main"]["main1"]["children"]["CD"+String(i + 1)]["configuredValue"] = jsonDoc["main"]["main1"]["children"]["CD"+String(i + 1)]["defaultValue"];
+  }
+  writeFile(jsonDoc,"/config.json");
+}
+
 
 void btnMenuClick() {
   //Serial.println("Button Clicked (nhấn nhả)");
@@ -372,7 +380,7 @@ void btnMenuClick() {
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
-  } else if (displayScreen == "screenTestMode"){
+  } else if (displayScreen == "screenTestMode" && testModeStep == 0){
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
@@ -415,6 +423,10 @@ void btnSetClick() {
         testOutputStep = 0;
         displayScreen = "testOutput";
         hienThiTestOutput = true;
+      } else {
+        columnIndex = maxLength-1;
+        showEdit(columnIndex);
+        displayScreen = "ScreenEdit";
       }
     }
   } else if (displayScreen == "ScreenEdit")  {
@@ -433,16 +445,14 @@ void btnSetClick() {
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
-  if (displayScreen = "ScreenEdit"){
+  if (displayScreen == "ScreenEdit"){
     if (keyStr == "CD"){
       jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
       log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
       loadJsonSettings();
       displayScreen = "ScreenCD";
     } else if (keyStr == "CN"){
-      if (setupCodeStr == "CN2"){
-        /* code */
-      } else if (setupCodeStr == "CN4" && currentValue == 1){
+      if (setupCodeStr == "CN4" && currentValue == 1){
         reSet();
         showText("RESET","Tat May Khoi Dong Lai!");
         trangThaiHoatDong = 200;  //Trạng thái hoạt động 200 là reset, không cho phép thao tác nào
@@ -473,7 +483,7 @@ void btnUpClick() {
     }
     loadJsonSettings(); // Hiển thị giá trị thiết lập
   } else if (displayScreen == "ScreenEdit") {
-    if (keyStr = "CD"){
+    if (keyStr == "CD"){
       editValue("addition");
       log("Value:" + valueStr);
     } else if (keyStr == "CN") {
@@ -491,9 +501,11 @@ void btnUpClick() {
   } else if (displayScreen == "screenTestMode"){
     if (testModeStep < maxTestModeStep){
       testModeStep ++;
-      chayTestMode = true;
-      showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
+    } else {
+      testModeStep = 0;
     }
+    chayTestMode = true;
+    showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
   }
 }
 
@@ -540,9 +552,9 @@ void btnDownClick() {
     }
   } else if (displayScreen == "screenTestMode"){
     if (testModeStep > 0){
-      testModeStep --;
+      /*testModeStep --;
       chayTestMode = true;
-      showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
+      showText("TEST MODE", String("Step " + String(testModeStep)).c_str());*/
     }
   }
 }
@@ -699,9 +711,6 @@ void testOutput(){
 
 void tinhToanCaiDat(){
 
-}
-void reSet(){
-   
 }
 
 void loadSetup(){
