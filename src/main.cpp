@@ -840,19 +840,20 @@ void loop() {
   case 2:
     mainRun();
     break;
-  case 200:
+  case 200:        //ESTOP dừng khẩn cấp
+    btnMenu.tick();
     break;
-  case 201:
+  case 201:         // Func Test Mode
     btnMenu.tick();
     btnUp.tick();
     btnDown.tick();
     testMode();
     break;
-  case 202:
+  case 202:        // Func Test Input
     btnMenu.tick();
     testInput();
     break;
-  case 203:
+  case 203:      // Func Test Output
     btnMenu.tick();
     btnSet.tick();
     btnUp.tick();
