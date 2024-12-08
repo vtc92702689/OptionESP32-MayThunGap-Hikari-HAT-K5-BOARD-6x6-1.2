@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload and Download File</title>
+</head>
+<body>
+    <h2>Upload File to ESP32</h2>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+    <h2>Download config.json</h2>
+    <a href="/download" download="config.json">Download config.json</a>
+</body>
+</html>

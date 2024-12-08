@@ -3,10 +3,17 @@
 #include <ArduinoJson.h>
 #include <OneButton.h>
 #include <LittleFS.h>
+#include <WiFi.h>
 #include "func.h"  // Bao gồm file header func.h để sử dụng các hàm từ func.cpp
+#include "ota.h"
 
 //U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
-U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
+//U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
+
+// Thông tin mạng WiFi và OTA
+const char* ssid = "OTA";
+const char* password = "12345678$$";
+const char* otaPassword = "9999";  // Mã xác thực OTA
 
 
 StaticJsonDocument<200> jsonDoc;
@@ -384,14 +391,16 @@ void btnMenuClick() {
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
+  } else if (displayScreen == "OTA"){
+
   }
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnMenuLongPressStart() {
-  //Serial.println("Button Long Press Started (BtnMenu)");
+  if (displayScreen == "OTA") {
+  }
 }
-
 // Hàm callback khi nút đang được giữ
 void btnMenuDuringLongPress() {
   //Serial.println("Button is being Long Pressed (BtnMenu)");
@@ -423,6 +432,10 @@ void btnSetClick() {
         testOutputStep = 0;
         displayScreen = "testOutput";
         hienThiTestOutput = true;
+      } else if ((setupCodeStr == "CN5")){
+        setupOTA(ssid, password, otaPassword);
+        displayScreen = "OTA";
+        trangThaiHoatDong = 204;  //Trạng thái hoạt động 203 là trạng thái TEST IO OUTPUT
       } else {
         columnIndex = maxLength-1;
         showEdit(columnIndex);
@@ -860,6 +873,9 @@ void loop() {
     btnDown.tick();
     testOutput();
     break;
+  case 204:
+    handleOTA(); // Xử lý OTA khi điều kiện đúng
+    break;  
   default:
     break;
   }

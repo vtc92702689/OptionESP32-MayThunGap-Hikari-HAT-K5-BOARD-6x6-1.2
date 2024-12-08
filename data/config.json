@@ -43,8 +43,8 @@
         "CD4": {
           "key": "CD4",
           "text": "Toc Do",
-          "defaultValue": 1000,
-          "configuredValue": 1000,
+          "defaultValue": 280,
+          "configuredValue": 280,
           "minValue": 100,
           "maxValue": 2000,
           "accessAllowed": true,
@@ -130,9 +130,21 @@
           "editAllowed": true,
           "explanationMode": false,
           "explanationDetails": ""
+        },
+        "CN5": {
+          "key": "CN5",
+          "text": "OTA UPDATE",
+          "defaultValue": 0,
+          "configuredValue": 0,
+          "minValue": 0,
+          "maxValue": 0,
+          "accessAllowed": true,
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         }
       },
-      "totalChildren": 4
+      "totalChildren": 5
     },
     "main3": {
       "text": "GIOI THIEU",
