@@ -435,7 +435,7 @@ void btnSetClick() {
       } else if ((setupCodeStr == "CN5")){
         setupOTA(ssid, password, otaPassword);
         displayScreen = "OTA";
-        trangThaiHoatDong = 204;  //Trạng thái hoạt động 203 là trạng thái TEST IO OUTPUT
+        trangThaiHoatDong = 204;  //Trạng thái hoạt động 204 là trạng thái OTA UPDATE+0
       } else {
         columnIndex = maxLength-1;
         showEdit(columnIndex);
