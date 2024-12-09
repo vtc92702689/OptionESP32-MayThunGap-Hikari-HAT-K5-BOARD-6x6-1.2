@@ -6,23 +6,55 @@
 
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
-AsyncWebServer server(80);
-unsigned long previousMillis = 0; // Biến để lưu thời gian lần cuối kiểm tra kết nối
-const long interval = 10000; // Khoảng thời gian giữa các lần kiểm tra (10 giây)
+const char* ssid = "OTA";
+const char* password = "12345678$$";
+const char* otaPassword = "9999";  // Mã xác thực OTA
 
-void setupOTA(const char* ssid, const char* password, const char* otaPassword) {
+IPAddress local_IP(192, 168, 137, 254); // Địa chỉ IP tĩnh mong muốn
+IPAddress gateway(192, 168, 137, 1);    // Địa chỉ Gateway
+IPAddress subnet(255, 255, 255, 0);   // Subnet Mask
+
+AsyncWebServer server(80);
+
+void setupOTA() {
     Serial.begin(115200);
 
+    // Cấu hình địa chỉ IP tĩnh
+    if (!WiFi.config(local_IP, gateway, subnet)) {
+        Serial.println("STA Failed to configure");
+    }
+    
     WiFi.begin(ssid, password);
+    
+    // Hiển thị quá trình kết nối WiFi lên màn hình OLED
+    u8g2.begin();
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 10, "Connecting to WiFi");
+    u8g2.sendBuffer();
+    
+    static int dotCount = 0;
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
+        
+        // Cập nhật màn hình OLED với dấu chấm
+        u8g2.clearBuffer();
+        u8g2.setFont(u8g2_font_ncenB08_tr);
+        u8g2.drawStr(0, 10, "Connecting to WiFi");
+        String dots = String(".");
+        for (int i = 0; i < dotCount; i++) {
+            dots += ".";
+        }
+        u8g2.drawStr(0, 30, dots.c_str());
+        u8g2.sendBuffer();
+        dotCount = (dotCount + 1) % 4; // Tạo hiệu ứng xoay vòng
     }
+
     Serial.println("\nWiFi connected");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    u8g2.begin();
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_ncenB08_tr);
     u8g2.drawStr(0, 10, "WiFi connected");
@@ -118,7 +150,9 @@ void setupOTA(const char* ssid, const char* password, const char* otaPassword) {
     setupWebServer();
 }
 
+void checkWiFiConnection();
 void handleOTA() {
+    checkWiFiConnection();
     ArduinoOTA.handle();
 }
 
@@ -129,7 +163,7 @@ void setupWebServer() {
     });
 
     // Upload file to the filesystem
-    server.on("/upload", HTTP_POST, 
+    server.on("/upload", HTTP_POST,
     [](AsyncWebServerRequest *request) {},
     [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
         static File uploadFile; // Khai báo static để duy trì trạng thái giữa các lệnh gọi
@@ -142,11 +176,8 @@ void setupWebServer() {
                 return;
             }
         }
-        if (len) {
-            Serial.printf("UploadChunk: %s\n", filename.c_str());
-            if (uploadFile) {
-                uploadFile.write(data, len);
-            }
+        if (uploadFile && len) {
+            uploadFile.write(data, len);
         }
         if (final) {
             Serial.printf("UploadEnd: %s\n", filename.c_str());
@@ -166,29 +197,47 @@ void setupWebServer() {
 }
 
 
-void checkWiFiConnection(const char* ssid, const char* password) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
-        if (WiFi.status() != WL_CONNECTED) {
-            Serial.println("WiFi disconnected, attempting to reconnect...");
-            WiFi.disconnect();
-            WiFi.begin(ssid, password);
-            while (WiFi.status() != WL_CONNECTED) {
-                delay(500);
-                Serial.print(".");
-            }
-            Serial.println("\nWiFi reconnected");
-            Serial.print("IP address: ");
-            Serial.println(WiFi.localIP());
-
+void checkWiFiConnection() {
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("WiFi disconnected, attempting to reconnect...");
+        WiFi.disconnect();
+        WiFi.begin(ssid, password);
+        
+        u8g2.clearBuffer();
+        u8g2.setFont(u8g2_font_ncenB08_tr);
+        u8g2.drawStr(0, 10, "Reconnecting WiFi...");
+        u8g2.sendBuffer();
+        
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(500); // Mỗi 500ms sẽ thử kết nối lại
+            Serial.print(".");
+            
+            // Hiển thị dấu chấm kết nối lên màn hình OLED
+            static int dotCount = 0;
             u8g2.clearBuffer();
             u8g2.setFont(u8g2_font_ncenB08_tr);
-            u8g2.drawStr(0, 10, "WiFi reconnected");
-            u8g2.drawStr(0, 30, "IP address:");
-            String url = WiFi.localIP().toString();
-            u8g2.drawStr(0, 50, url.c_str());
+            u8g2.drawStr(0, 10, "Reconnecting WiFi...");
+            String dots = String(".");
+            for (int i = 0; i < dotCount; i++) {
+                dots += ".";
+            }
+            u8g2.drawStr(0, 30, dots.c_str());
             u8g2.sendBuffer();
+            dotCount = (dotCount + 1) % 4; // Tạo hiệu ứng xoay vòng
         }
+
+        Serial.println("\nWiFi reconnected");
+        Serial.print("IP address: ");
+        Serial.println(WiFi.localIP());
+
+        u8g2.clearBuffer();
+        u8g2.setFont(u8g2_font_ncenB08_tr);
+        u8g2.drawStr(0, 10, "WiFi reconnected");
+        u8g2.drawStr(0, 30, "IP address:");
+        String url = WiFi.localIP().toString();
+        u8g2.drawStr(0, 50, url.c_str());
+        u8g2.sendBuffer();
     }
 }
+
+
