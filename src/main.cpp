@@ -130,6 +130,8 @@ void btnSetLongPressStart() {
       jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
       log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
       loadJsonSettings();
+      loadSetup();
+      tinhToanCaiDat();
       displayScreen = "ScreenCD";
     } else if (keyStr == "CN"){
       if (setupCodeStr == "CN4" && currentValue == 1){
