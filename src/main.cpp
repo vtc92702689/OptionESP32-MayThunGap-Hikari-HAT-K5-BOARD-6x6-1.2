@@ -1,8 +1,5 @@
 #include <Arduino.h>
-#include <U8g2lib.h>
-#include <ArduinoJson.h>
 #include <OneButton.h>
-#include <LittleFS.h>
 #include "ota.h"
 #include "func.h"  // Bao gồm file header func.h để sử dụng các hàm từ func.cpp
 
@@ -17,7 +14,8 @@
 StaticJsonDocument<200> jsonDoc;
 
 const char* jsonString = R"()";
-
+void tinhToanCaiDat();
+void loadSetup();
 
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
@@ -104,7 +102,7 @@ void btnSetClick() {
         displayScreen = "OTA";
         trangThaiHoatDong = 204;  //Trạng thái hoạt động 204 là trạng thái OTA UPDATE+0
       } else {
-        columnIndex = maxLength-1;
+        columnIndex = maxLength - 1;
         showEdit(columnIndex);
         displayScreen = "ScreenEdit";
       }
@@ -136,7 +134,7 @@ void btnSetLongPressStart() {
     } else if (keyStr == "CN"){
       if (setupCodeStr == "CN4" && currentValue == 1){
         reSet();
-        showText("RESET","Tat May Khoi Dong Lai!");
+        showText("RESET","Tắt máy khởi động lại!");
         trangThaiHoatDong = 200;  //Trạng thái hoạt động 200 là reset, không cho phép thao tác nào
         displayScreen = "RESET";
       }
@@ -397,13 +395,12 @@ void tinhToanCaiDat(){
 
 void loadSetup(){
 
-  tinhToanCaiDat();
-  trangThaiHoatDong = 1;
+
 }
 
 void khoiDong(){
   displayScreen = "index";
-  showText("HELLO","ESP32-OPTION");
+  showText("HELLO","Xin Chào");
   mainStep = 0;
   trangThaiHoatDong = 0;
   loadSetup();
@@ -433,6 +430,7 @@ void setup() {
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
 
   u8g2.begin();  // Khởi tạo màn hình OLED
+  u8g2.enableUTF8Print(); // Kích hoạt hỗ trợ UTF-8
 
   btnMenu.attachClick(btnMenuClick);
   btnMenu.attachLongPressStart(btnMenuLongPressStart);
