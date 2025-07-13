@@ -251,26 +251,19 @@ void btnDownDuringLongPress() {
 
 //KHAI BÁO CHÂN IO Ở ĐÂY
 
-const int sensorCilinderXp1 = 17;
-const int sensorCilinderXp2 = 16;
+const int sensorKep = 17;
+const int sensorDao = 16;
 
-const int sensorCilinderYp1 = 4;
-const int sensorCilinderYp2 = 0;
 
-const int sensorOrigin = 2;
-const int sensorFoot = 15;
-const int sensorActive = 23;
-
-const int outRelayX = 25;
-const int outRelayY = 26;
-const int outRelayFoot = 27;
-const int outRelayRun = 14;
-
-const int pinDir = 1;
-const int pinPWM = 3;
+const int outRelayXoay = 25;
+const int outRelayKep = 26;
+const int outRelayChan = 27;
 
 //KHAI BÁO THÔNG SỐ TRƯƠNG TRÌNH
 
+int timeDelayXoay = 1000;
+int timeDelayChan = 1000;
+int timeDelayTraLai = 1000;
 
 
 
@@ -302,83 +295,51 @@ void testMode(){
 
 void testInput(){
   static bool trangthaiCuoiIO1;
-  if (digitalRead(sensorCilinderXp1)!= trangthaiCuoiIO1){
-    trangthaiCuoiIO1 = digitalRead(sensorCilinderXp1);
+  if (digitalRead(sensorKep)!= trangthaiCuoiIO1){
+    trangthaiCuoiIO1 = digitalRead(sensorKep);
     showText("IO 17" , String(trangthaiCuoiIO1).c_str());
   }
   static bool trangthaiCuoiIO2;
-  if (digitalRead(sensorCilinderXp2)!= trangthaiCuoiIO2){
-    trangthaiCuoiIO2 = digitalRead(sensorCilinderXp2);
+  if (digitalRead(sensorDao)!= trangthaiCuoiIO2){
+    trangthaiCuoiIO2 = digitalRead(sensorDao);
     showText("IO 16" , String(trangthaiCuoiIO2).c_str());
-  }
-  static bool trangthaiCuoiIO3;
-  if (digitalRead(sensorCilinderYp1)!= trangthaiCuoiIO3){
-    trangthaiCuoiIO3 = digitalRead(sensorCilinderYp1);
-    showText("IO 04" , String(trangthaiCuoiIO3).c_str());
-  }
-  static bool trangthaiCuoiIO4;
-  if (digitalRead(sensorCilinderYp2)!= trangthaiCuoiIO4){
-    trangthaiCuoiIO4 = digitalRead(sensorCilinderYp2);
-    showText("IO 00" , String(trangthaiCuoiIO4).c_str());
-  }
-  static bool trangthaiCuoiIO5;
-  if (digitalRead(sensorOrigin)!= trangthaiCuoiIO5){
-    trangthaiCuoiIO5 = digitalRead(sensorOrigin);
-    showText("IO 02" , String(trangthaiCuoiIO5).c_str());
-  }
-  static bool trangthaiCuoiIO6;
-  if (digitalRead(sensorFoot)!= trangthaiCuoiIO6){
-    trangthaiCuoiIO6 = digitalRead(sensorFoot);
-    showText("IO 15" , String(trangthaiCuoiIO6).c_str());
   }
 }
 void testOutput(){
   switch (testOutputStep){
     case 0:
       if (hienThiTestOutput){
-        maxTestOutputStep = 3;
-        bool tinHieuHienTai = digitalRead(outRelayX);
+        maxTestOutputStep = 2;
+        bool tinHieuHienTai = digitalRead(outRelayKep);
         showText("IO 25", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayX);
-        digitalWrite(outRelayX,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(outRelayKep);
+        digitalWrite(outRelayKep,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
       break;
     case 1:
       if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayY);
+        bool tinHieuHienTai = digitalRead(outRelayXoay);
         showText("IO 26", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayY);
-        digitalWrite(outRelayY,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(outRelayXoay);
+        digitalWrite(outRelayXoay,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
       break;
     case 2:
       if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayFoot);
+        bool tinHieuHienTai = digitalRead(outRelayChan);
         showText("IO 27", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayFoot);
-        digitalWrite(outRelayFoot,!tinHieuHienTai);
-        hienThiTestOutput = true;
-        daoTinHieuOutput = false;
-      }
-      break;
-    case 3:
-      if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayRun);
-        showText("IO 14", String(tinHieuHienTai).c_str());
-        hienThiTestOutput = false;
-      } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayRun);
-        digitalWrite(outRelayRun,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(outRelayChan);
+        digitalWrite(outRelayChan,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
@@ -390,12 +351,14 @@ void testOutput(){
 
 
 void tinhToanCaiDat(){
-
+  
 }
 
 void loadSetup(){
-
-
+  timeDelayXoay = jsonDoc["main"]["main1"]["children"]["CD1"]["configuredValue"];
+  timeDelayChan = jsonDoc["main"]["main1"]["children"]["CD2"]["configuredValue"];
+  timeDelayTraLai = jsonDoc["main"]["main1"]["children"]["CD3"]["configuredValue"];
+  
 }
 
 void khoiDong(){
@@ -409,13 +372,23 @@ void khoiDong(){
 void mainRun(){
   switch (mainStep){
   case 0:
+    
+    break;
+  case 1:
     /* code */
+    if (digitalRead(sensorKep)){    
+      mainStep++;
+    }
     break;
   
-  case 1:
-
-    break;
   case 2:
+    digitalWrite(outRelayKep,HIGH);
+    WaitMillis(timeDelayXoay);
+    digialWrite(outRelayXoay,HIGH);
+    digialWrite(outRelayChan,HIGH);
+    mainStep++;
+    break;
+  case 3:
     /* code */
     break;
   default:
@@ -458,20 +431,12 @@ void setup() {
   btnUp.setPressMs(btnSetPressMill);
   btnDown.setPressMs(btnSetPressMill);
 
-  pinMode(sensorCilinderXp1,INPUT);
-  pinMode(sensorCilinderXp2,INPUT);
-  pinMode(sensorCilinderYp1,INPUT);
-  pinMode(sensorCilinderYp2,INPUT);
-  pinMode(sensorActive,INPUT);
-  pinMode(sensorFoot,INPUT);
-  pinMode(sensorOrigin,INPUT);
+  pinMode(sensorKep,INPUT);
+  pinMode(sensorDao,INPUT);
 
-  pinMode(pinDir,OUTPUT);
-  pinMode(pinPWM,OUTPUT);
-  pinMode(outRelayX,OUTPUT);
-  pinMode(outRelayY,OUTPUT);
-  pinMode(outRelayFoot,OUTPUT);
-  pinMode(outRelayRun,OUTPUT);
+  pinMode(outRelayKep,OUTPUT);
+  pinMode(outRelayXoay,OUTPUT);
+  pinMode(outRelayChan,OUTPUT);
 
 
   if (!LittleFS.begin()) {
