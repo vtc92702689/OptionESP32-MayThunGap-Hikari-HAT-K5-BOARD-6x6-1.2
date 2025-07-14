@@ -39,9 +39,33 @@
           "editAllowed": true,
           "explanationMode": false,
           "explanationDetails": ""
+        },
+        "CD4": {
+          "key": "CD4",
+          "text": "Đ.Trễ kẹp",
+          "defaultValue": 500,
+          "configuredValue": 500,
+          "minValue": 1,
+          "maxValue": 10000,
+          "accessAllowed": true,
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
+        },
+        "CD5": {
+          "key": "CD5",
+          "text": "Đ.Trễ nhả kẹp",
+          "defaultValue": 1000,
+          "configuredValue": 1000,
+          "minValue": 1,
+          "maxValue": 10000,
+          "accessAllowed": true,
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         }
       },
-      "totalChildren": 3
+      "totalChildren": 5
     },
     "main2": {
       "text": "CHỨC NĂNG",

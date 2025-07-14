@@ -43,7 +43,7 @@ void btnMenuClick() {
   } else if (displayScreen == "MENU" && mainStep == 0){
     displayScreen= "index";
     trangThaiHoatDong = 1;
-    showText("HELLO", "ESP32-OPTION");
+    showText("RUNNING", "ESP32-OPTION");
   } else if (displayScreen == "testIO"){
     loadJsonSettings();
     displayScreen = "ScreenCD";
@@ -241,6 +241,7 @@ void btnDownClick() {
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnDownLongPressStart() {
+  trangThaiHoatDong = 199;
   //Serial.println("Button Long Press Started (btnDown)");
 }
 
@@ -253,6 +254,7 @@ void btnDownDuringLongPress() {
 
 const int sensorKep = 17;
 const int sensorDao = 16;
+const int sensorViTriCang = 4;
 
 
 const int outRelayXoay = 25;
@@ -264,6 +266,9 @@ const int outRelayChan = 27;
 int timeDelayXoay = 1000;
 int timeDelayChan = 1000;
 int timeDelayTraLai = 1000;
+int timeDelayKep = 1000;
+int timeDelayNhaKep = 1000;
+bool trangThaiCuoiCungCamBienViTri = false ;
 
 
 
@@ -358,7 +363,8 @@ void loadSetup(){
   timeDelayXoay = jsonDoc["main"]["main1"]["children"]["CD1"]["configuredValue"];
   timeDelayChan = jsonDoc["main"]["main1"]["children"]["CD2"]["configuredValue"];
   timeDelayTraLai = jsonDoc["main"]["main1"]["children"]["CD3"]["configuredValue"];
-  
+  timeDelayKep = jsonDoc["main"]["main1"]["children"]["CD4"]["configuredValue"];
+  timeDelayNhaKep = jsonDoc["main"]["main1"]["children"]["CD5"]["configuredValue"];
 }
 
 void khoiDong(){
@@ -367,29 +373,50 @@ void khoiDong(){
   mainStep = 0;
   trangThaiHoatDong = 0;
   loadSetup();
+  tinhToanCaiDat();
+  trangThaiHoatDong = 1;
 }
 
 void mainRun(){
+  bool trangThaiHienTaiCamBienViTri = digitalRead(sensorViTriCang);
+  if (trangThaiCuoiCungCamBienViTri != trangThaiHienTaiCamBienViTri){
+    if(trangThaiHienTaiCamBienViTri){
+      digitalWrite(outRelayXoay,LOW);
+      delay(timeDelayNhaKep);
+      digitalWrite(outRelayKep,LOW);
+      trangThaiHoatDong = 1;
+      mainStep = 0;
+    } else {
+      delay(timeDelayKep);
+      digitalWrite(outRelayKep,HIGH);
+    }
+    trangThaiCuoiCungCamBienViTri = trangThaiHienTaiCamBienViTri ;
+  }
   switch (mainStep){
   case 0:
     
     break;
   case 1:
     /* code */
-    if (digitalRead(sensorKep)){    
+    if (digitalRead(sensorKep)){   
+      digitalWrite(outRelayKep,HIGH);
+      delay(timeDelayXoay);
+      digitalWrite(outRelayXoay,HIGH);
+      digitalWrite(outRelayChan,HIGH); 
       mainStep++;
     }
     break;
   
   case 2:
-    digitalWrite(outRelayKep,HIGH);
-    WaitMillis(timeDelayXoay);
-    digialWrite(outRelayXoay,HIGH);
-    digialWrite(outRelayChan,HIGH);
-    mainStep++;
+    if (digitalRead(sensorDao)){
+      digitalWrite(outRelayKep,LOW);
+      digitalWrite(outRelayChan,LOW); 
+      delay(timeDelayTraLai);
+      digitalWrite(outRelayXoay,LOW);
+    }
     break;
   case 3:
-    /* code */
+    
     break;
   default:
     break;
@@ -479,12 +506,22 @@ void loop() {
     break;
   case 1:
     btnMenu.tick();
-    
-    
+    btnDown.tick();
+    if (digitalRead(sensorKep)){
+      mainStep = 1;
+      trangThaiHoatDong = 2;
+    }
     break;
   case 2:
+    btnDown.tick();
     mainRun();
     break;
+  case 199:   //về gốc
+    digitalWrite(outRelayKep,LOW);
+    delay(200);
+    digitalWrite(outRelayXoay,LOW);
+    mainStep = 0;
+    trangThaiHoatDong = 1;
   case 200:        //ESTOP dừng khẩn cấp
     btnMenu.tick();
     break;
