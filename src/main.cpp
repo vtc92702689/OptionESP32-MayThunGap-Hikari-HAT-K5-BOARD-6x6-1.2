@@ -517,9 +517,11 @@ void loop() {
     mainRun();
     break;
   case 199:   //về gốc
-    digitalWrite(outRelayKep,LOW);
+    digitalWrite(outRelayKep,HIGH);
     delay(200);
     digitalWrite(outRelayXoay,LOW);
+    delay(200);
+    digitalWrite(outRelayKep,LOW);
     mainStep = 0;
     trangThaiHoatDong = 1;
   case 200:        //ESTOP dừng khẩn cấp
