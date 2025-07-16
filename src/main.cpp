@@ -386,7 +386,7 @@ void mainRun(){
       digitalWrite(outRelayKep,LOW);
       trangThaiHoatDong = 1;
       mainStep = 0;
-    } else {
+    } else if (trangThaiCuoiCungCamBienViTri != trangThaiHienTaiCamBienViTri && !digitalRead(sensorKep)) {
       delay(timeDelayKep);
       digitalWrite(outRelayKep,HIGH);
     }
@@ -518,9 +518,9 @@ void loop() {
     break;
   case 199:   //về gốc
     digitalWrite(outRelayKep,HIGH);
-    delay(200);
+    delay(1000);
     digitalWrite(outRelayXoay,LOW);
-    delay(200);
+    delay(1000);
     digitalWrite(outRelayKep,LOW);
     mainStep = 0;
     trangThaiHoatDong = 1;
