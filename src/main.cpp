@@ -255,11 +255,12 @@ void btnDownDuringLongPress() {
 const int sensorKep = 17;
 const int sensorDao = 16;
 const int sensorViTriCang = 4;
+const int sensorTayKep = 15;
 
 
 const int outRelayXoay = 25;
 const int outRelayKep = 26;
-const int outRelayChan = 27;
+const int outRelayTayKep= 27;
 
 //KHAI BÁO THÔNG SỐ TRƯƠNG TRÌNH
 
@@ -268,7 +269,7 @@ int timeDelayChan = 1000;
 int timeDelayTraLai = 1000;
 int timeDelayKep = 1000;
 int timeDelayNhaKep = 1000;
-bool trangThaiCuoiCungCamBienViTri = false ;
+bool trangThaiCuoiCungCamBienViTri = true ;
 
 
 
@@ -339,12 +340,12 @@ void testOutput(){
       break;
     case 2:
       if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayChan);
+        bool tinHieuHienTai = digitalRead(outRelayTayKep);
         showText("IO 27", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayChan);
-        digitalWrite(outRelayChan,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(outRelayTayKep);
+        digitalWrite(outRelayTayKep,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
@@ -384,6 +385,7 @@ void mainRun(){
       digitalWrite(outRelayXoay,LOW);
       delay(timeDelayNhaKep);
       digitalWrite(outRelayKep,LOW);
+      digitalWrite(outRelayTayKep,LOW);
       trangThaiHoatDong = 1;
       mainStep = 0;
     } else if (trangThaiCuoiCungCamBienViTri != trangThaiHienTaiCamBienViTri && !digitalRead(sensorKep)) {
@@ -402,21 +404,24 @@ void mainRun(){
       digitalWrite(outRelayKep,HIGH);
       delay(timeDelayXoay);
       digitalWrite(outRelayXoay,HIGH);
-      digitalWrite(outRelayChan,HIGH); 
       mainStep++;
     }
     break;
   
   case 2:
-    if (digitalRead(sensorDao)){
-      digitalWrite(outRelayKep,LOW);
-      digitalWrite(outRelayChan,LOW); 
-      delay(timeDelayTraLai);
-      digitalWrite(outRelayXoay,LOW);
+    if(digitalRead(sensorTayKep)){
+      digitalWrite(outRelayTayKep,HIGH);
+      mainStep++;
     }
     break;
   case 3:
-    
+    if (digitalRead(sensorDao)){
+      digitalWrite(outRelayKep,LOW);
+      delay(timeDelayTraLai);
+      digitalWrite(outRelayKep,HIGH);
+      delay(70);
+      digitalWrite(outRelayXoay,LOW);
+    }
     break;
   default:
     break;
@@ -460,10 +465,13 @@ void setup() {
 
   pinMode(sensorKep,INPUT);
   pinMode(sensorDao,INPUT);
+  pinMode(sensorViTriCang,INPUT);
+  pinMode(sensorTayKep,INPUT);
+
 
   pinMode(outRelayKep,OUTPUT);
   pinMode(outRelayXoay,OUTPUT);
-  pinMode(outRelayChan,OUTPUT);
+  pinMode(outRelayTayKep,OUTPUT);
 
 
   if (!LittleFS.begin()) {
@@ -522,6 +530,7 @@ void loop() {
     digitalWrite(outRelayXoay,LOW);
     delay(1000);
     digitalWrite(outRelayKep,LOW);
+    digitalWrite(outRelayTayKep,LOW);
     mainStep = 0;
     trangThaiHoatDong = 1;
   case 200:        //ESTOP dừng khẩn cấp

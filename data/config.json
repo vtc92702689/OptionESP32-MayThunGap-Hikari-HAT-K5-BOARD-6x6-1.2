@@ -31,8 +31,8 @@
         "CD3": {
           "key": "CD3",
           "text": "Đ.Trễ trả ngược",
-          "defaultValue": 1000,
-          "configuredValue": 1000,
+          "defaultValue": 200,
+          "configuredValue": 200,
           "minValue": 1,
           "maxValue": 10000,
           "accessAllowed": true,
@@ -55,8 +55,8 @@
         "CD5": {
           "key": "CD5",
           "text": "Đ.Trễ nhả kẹp",
-          "defaultValue": 1000,
-          "configuredValue": 1000,
+          "defaultValue": 300,
+          "configuredValue": 300,
           "minValue": 1,
           "maxValue": 10000,
           "accessAllowed": true,
