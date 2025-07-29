@@ -310,6 +310,16 @@ void testInput(){
     trangthaiCuoiIO2 = digitalRead(sensorDao);
     showText("IO 16" , String(trangthaiCuoiIO2).c_str());
   }
+  static bool trangthaiCuoiIO3;
+  if (digitalRead(sensorViTriCang)!= trangthaiCuoiIO3){
+    trangthaiCuoiIO3 = digitalRead(sensorViTriCang);
+    showText("IO 4" , String(trangthaiCuoiIO3).c_str());
+  }
+  static bool trangthaiCuoiIO4;
+  if (digitalRead(sensorTayKep)!= trangthaiCuoiIO4){
+    trangthaiCuoiIO4 = digitalRead(sensorTayKep);
+    showText("IO 15" , String(trangthaiCuoiIO4).c_str());
+  }
 }
 void testOutput(){
   switch (testOutputStep){
