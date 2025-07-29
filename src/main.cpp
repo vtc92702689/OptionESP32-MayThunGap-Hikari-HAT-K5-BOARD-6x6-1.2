@@ -17,12 +17,12 @@ const char* jsonString = R"()";
 void tinhToanCaiDat();
 void loadSetup();
 
-OneButton btnMenu(34, false,false);
-OneButton btnSet(35, false,false);
-OneButton btnUp(36, false,false);
-OneButton btnDown(39, false,false);
-OneButton btnRun(32,false,false);
-OneButton btnEstop(33,false,false);
+OneButton btnMenu(0, true,false);
+OneButton btnSet(2, true,false);
+OneButton btnUp(12, false,false);
+OneButton btnDown(15, false,false);
+OneButton btnRun(23,false,false);
+OneButton btnEstop(13,false,false);
 
 
 void btnMenuClick() {
@@ -252,15 +252,15 @@ void btnDownDuringLongPress() {
 
 //KHAI BÁO CHÂN IO Ở ĐÂY
 
-const int sensorKep = 17;
-const int sensorDao = 16;
-const int sensorViTriCang = 4;
-const int sensorTayKep = 15;
+const int sensorKep = 36;
+const int sensorDao = 39;
+const int sensorViTriCang = 34;
+const int sensorTayKep = 35;
 
 
-const int outRelayXoay = 25;
-const int outRelayKep = 26;
-const int outRelayTayKep= 27;
+const int outRelayXoay = 4;
+const int outRelayKep = 16;
+const int outRelayTayKep= 17;
 
 //KHAI BÁO THÔNG SỐ TRƯƠNG TRÌNH
 
