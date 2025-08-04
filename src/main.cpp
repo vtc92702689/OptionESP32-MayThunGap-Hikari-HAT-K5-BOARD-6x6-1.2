@@ -18,7 +18,7 @@ void tinhToanCaiDat();
 void loadSetup();
 
 OneButton btnMenu(0, true,false);
-OneButton btnSet(2, true,false);
+OneButton btnSet(2, false,false);
 OneButton btnUp(12, false,false);
 OneButton btnDown(15, false,false);
 OneButton btnRun(23,false,false);
@@ -255,7 +255,7 @@ void btnDownDuringLongPress() {
 const int sensorKep = 36;
 const int sensorDao = 39;
 const int sensorViTriCang = 34;
-const int sensorTayKep = 35;
+const int sensorTayKep = 33;
 
 
 const int outRelayXoay = 4;
@@ -303,22 +303,22 @@ void testInput(){
   static bool trangthaiCuoiIO1;
   if (digitalRead(sensorKep)!= trangthaiCuoiIO1){
     trangthaiCuoiIO1 = digitalRead(sensorKep);
-    showText("IO 17" , String(trangthaiCuoiIO1).c_str());
+    showText("IO 36" , String(trangthaiCuoiIO1).c_str());
   }
   static bool trangthaiCuoiIO2;
   if (digitalRead(sensorDao)!= trangthaiCuoiIO2){
     trangthaiCuoiIO2 = digitalRead(sensorDao);
-    showText("IO 16" , String(trangthaiCuoiIO2).c_str());
+    showText("IO 39" , String(trangthaiCuoiIO2).c_str());
   }
   static bool trangthaiCuoiIO3;
   if (digitalRead(sensorViTriCang)!= trangthaiCuoiIO3){
     trangthaiCuoiIO3 = digitalRead(sensorViTriCang);
-    showText("IO 4" , String(trangthaiCuoiIO3).c_str());
+    showText("IO 34" , String(trangthaiCuoiIO3).c_str());
   }
   static bool trangthaiCuoiIO4;
   if (digitalRead(sensorTayKep)!= trangthaiCuoiIO4){
     trangthaiCuoiIO4 = digitalRead(sensorTayKep);
-    showText("IO 15" , String(trangthaiCuoiIO4).c_str());
+    showText("IO 33" , String(trangthaiCuoiIO4).c_str());
   }
 }
 void testOutput(){
@@ -327,7 +327,7 @@ void testOutput(){
       if (hienThiTestOutput){
         maxTestOutputStep = 2;
         bool tinHieuHienTai = digitalRead(outRelayKep);
-        showText("IO 25", String(tinHieuHienTai).c_str());
+        showText("IO 4", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
         bool tinHieuHienTai = digitalRead(outRelayKep);
@@ -339,7 +339,7 @@ void testOutput(){
     case 1:
       if (hienThiTestOutput){
         bool tinHieuHienTai = digitalRead(outRelayXoay);
-        showText("IO 26", String(tinHieuHienTai).c_str());
+        showText("IO 16", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
         bool tinHieuHienTai = digitalRead(outRelayXoay);
@@ -351,7 +351,7 @@ void testOutput(){
     case 2:
       if (hienThiTestOutput){
         bool tinHieuHienTai = digitalRead(outRelayTayKep);
-        showText("IO 27", String(tinHieuHienTai).c_str());
+        showText("IO 17", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
         bool tinHieuHienTai = digitalRead(outRelayTayKep);
@@ -379,6 +379,7 @@ void loadSetup(){
 }
 
 void khoiDong(){
+  delay(500);
   displayScreen = "index";
   showText("HELLO","Xin Chào");
   mainStep = 0;
