@@ -326,24 +326,24 @@ void testOutput(){
     case 0:
       if (hienThiTestOutput){
         maxTestOutputStep = 2;
-        bool tinHieuHienTai = digitalRead(outRelayKep);
+        bool tinHieuHienTai = digitalRead(outRelayXoay);
         showText("IO 4", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayKep);
-        digitalWrite(outRelayKep,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(outRelayXoay);
+        digitalWrite(outRelayXoay,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
       break;
     case 1:
       if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayXoay);
+        bool tinHieuHienTai = digitalRead(outRelayKep);
         showText("IO 16", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayXoay);
-        digitalWrite(outRelayXoay,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(outRelayKep);
+        digitalWrite(outRelayKep,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
