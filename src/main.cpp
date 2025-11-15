@@ -100,7 +100,7 @@ void btnSetClick() {
       } else if ((setupCodeStr == "CN5")){
         setupOTA();
         displayScreen = "OTA";
-        trangThaiHoatDong = 204;  //Trạng thái hoạt động 204 là trạng thái OTA UPDATE+0
+        trangThaiHoatDong = 204;  //Trạng thái hoạt động 204 là trạng thái OTA UPDATE
       } else {
         columnIndex = maxLength - 1;
         showEdit(columnIndex);
